@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: finsight_db
+    environment:
+      POSTGRES_USER: finsight
+      POSTGRES_PASSWORD: finsight
+      POSTGRES_DB: finsight
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: finsight_backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/finsight
+      SPRING_DATASOURCE_USERNAME: finsight
+      SPRING_DATASOURCE_PASSWORD: finsight
+      AI_SERVICE_URL: http://ai-service:8000
+    ports:
+      - "8080:8080"
+
+  ai-service:
+    build:
+      context: ../ai-service
+      dockerfile: ../AI/Dockerfile
+    container_name: finsight_ai_service
+    depends_on:
+      - db
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:
+
+# Примечание: Dockerfile‑файлы для backend и ai‑service приведены в
+# соответствующих каталогах.  При необходимости их можно
+# адаптировать.  Для локальной разработки сервисы можно запускать и
+# без Docker.

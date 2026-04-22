@@ -15,7 +15,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PasswordResetToken {
+public class PasswordResetToken implements UserToken {
     @Id
     @GeneratedValue
     private UUID id;

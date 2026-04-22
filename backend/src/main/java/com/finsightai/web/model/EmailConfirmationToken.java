@@ -15,7 +15,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailConfirmationToken {
+public class EmailConfirmationToken implements UserToken {
     @Id
     @GeneratedValue
     private UUID id;

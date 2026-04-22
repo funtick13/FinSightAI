@@ -1,0 +1,100 @@
+package com.finsightai.web.service;
+
+import com.finsightai.web.dto.RegisterRequest;
+import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.model.User;
+import com.finsightai.web.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class RegisterServiceTest {
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private EmailConfirmationTokenService emailConfirmationTokenService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private AuthService registerService;
+
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
+
+    @Test
+    void isEmailUniqueReturnsTrueWhenEmailDoesNotExist() {
+        RegisterRequest request = new RegisterRequest("user@example.com", "password");
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
+
+        boolean result = registerService.isEmailUnique(request);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void isEmailUniqueReturnsFalseWhenEmailAlreadyExists() {
+        RegisterRequest request = new RegisterRequest("user@example.com", "password");
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
+
+        boolean result = registerService.isEmailUnique(request);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void registerCreatesUnconfirmedUserAndRequestsEmailConfirmationTokenWhenEmailIsUnique() {
+        RegisterRequest request = new RegisterRequest("user@example.com", "plain-password");
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MessageResponse response = registerService.register(request);
+
+        assertTrue(response.isSuccess());
+        assertNotNull(response.getMessage());
+
+
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertEquals("user@example.com", savedUser.getEmail());
+        assertEquals("encoded-password", savedUser.getPasswordHash());
+        assertFalse(savedUser.isEmailConfirmed());
+        assertNotNull(savedUser.getCreatedAt());
+        assertNotNull(savedUser.getUpdatedAt());
+
+        verify(emailConfirmationTokenService).create(savedUser);
+    }
+
+    @Test
+    void registerRejectsRequestWhenEmailAlreadyExists() {
+        RegisterRequest request = new RegisterRequest("user@example.com", "plain-password");
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
+
+        MessageResponse response = registerService.register(request);
+
+        assertFalse(response.isSuccess());
+        assertNotNull(response.getMessage());
+
+        verify(userRepository, never()).save(any(User.class));
+        verifyNoInteractions(passwordEncoder, emailConfirmationTokenService);
+    }
+}

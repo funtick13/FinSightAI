@@ -9,7 +9,6 @@ D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\ResetPassw
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\EmailConfirmationToken.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\PasswordResetToken.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\User.java
-D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\UserDetailsImpl.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\UserToken.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\repository\EmailConfirmationTokenRepository.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\repository\PasswordResetTokenRepository.java

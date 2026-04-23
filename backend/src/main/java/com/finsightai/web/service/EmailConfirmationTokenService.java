@@ -1,6 +1,8 @@
 package com.finsightai.web.service;
 
 import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.exception.TokenExpiredException;
+import com.finsightai.web.exception.TokenNotFoundException;
 import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.EmailConfirmationTokenRepository;
@@ -30,11 +32,11 @@ public class EmailConfirmationTokenService extends TokenService<EmailConfirmatio
 
     public MessageResponse confirmEmail(String tokenValue) {
         EmailConfirmationToken token = emailConfirmationTokenRepository.findByTokenAndUsedAtIsNull(tokenValue)
-                .orElseThrow(() -> new RuntimeException("Токен подтверждения email не найден"));
+                .orElseThrow(() -> new TokenNotFoundException("подтверждения email"));
 
         LocalDateTime now = LocalDateTime.now();
         if (token.getExpiresAt().isBefore(now)) {
-            throw new RuntimeException("Срок действия токена подтверждения email истёк");
+            throw new TokenExpiredException("подтверждения email");
         }
 
         User user = token.getUser();
@@ -45,9 +47,6 @@ public class EmailConfirmationTokenService extends TokenService<EmailConfirmatio
         userRepository.save(user);
         emailConfirmationTokenRepository.save(token);
 
-        return new MessageResponse(
-                true,
-                "Email успешно подтверждён"
-        );
+        return new MessageResponse(true, "Email успешно подтверждён");
     }
 }

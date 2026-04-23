@@ -1,5 +1,6 @@
 package com.finsightai.web.service;
 
+import com.finsightai.web.exception.JwtKeyException;
 import com.finsightai.web.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -64,7 +65,7 @@ public class JwtService {
                     .digest(secret.getBytes(StandardCharsets.UTF_8));
             return Keys.hmacShaKeyFor(keyBytes);
         } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("Не удалось подготовить ключ подписи JWT", exception);
+            throw new JwtKeyException(exception);
         }
     }
 }

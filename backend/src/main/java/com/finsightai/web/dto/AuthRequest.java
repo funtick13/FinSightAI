@@ -11,11 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class RegisterRequest {
+public class AuthRequest {
     @NotBlank(message = "Эл. почта не может быть пустой")
     @Email(message = "Неверный формат почты")
     private String email;
-
     @NotBlank(message = "Пароль не может быть пустым")
     private String password;
 }

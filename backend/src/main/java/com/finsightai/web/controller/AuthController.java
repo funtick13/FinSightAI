@@ -1,7 +1,7 @@
 package com.finsightai.web.controller;
 
 import com.finsightai.web.dto.ForgotPasswordRequest;
-import com.finsightai.web.dto.RegisterRequest;
+import com.finsightai.web.dto.AuthRequest;
 import com.finsightai.web.dto.MessageResponse;
 import com.finsightai.web.dto.ResetPasswordRequest;
 import com.finsightai.web.service.AuthService;
@@ -17,8 +17,13 @@ public class AuthController {
     private final AuthService authService;
     private final EmailConfirmationTokenService emailConfirmationTokenService;
 
+    @PostMapping("/login")
+    public MessageResponse login(@Valid @RequestBody AuthRequest loginRequest) {
+        return authService.login(loginRequest);
+    }
+
     @PostMapping("/register")
-    public MessageResponse register(@Valid @RequestBody RegisterRequest registerRequest) {
+    public MessageResponse register(@Valid @RequestBody AuthRequest registerRequest) {
         return authService.register(registerRequest);
     }
 
@@ -28,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public MessageResponse forgotPassword(@Valid @RequestBody  ForgotPasswordRequest forgotPasswordRequest) {
+    public MessageResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         return authService.forgotPassword(forgotPasswordRequest);
     }
 

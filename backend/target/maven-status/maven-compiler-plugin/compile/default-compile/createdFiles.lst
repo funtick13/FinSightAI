@@ -1,1 +1,3 @@
 com\finsightai\web\service\JwtService.class
+com\finsightai\web\service\EmailConfirmationTokenService.class
+com\finsightai\web\service\AuthService.class

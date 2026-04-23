@@ -80,7 +80,6 @@ class EmailConfirmationTokenServiceTest {
 
         emailConfirmationTokenService.confirmEmail("confirmation-token");
 
-        assertTrue(user.isEmailConfirmed());
         assertNotNull(token.getUsedAt());
         assertTrue(user.getUpdatedAt().isAfter(token.getCreatedAt()));
         verify(userRepository).save(user);

@@ -1,0 +1,4 @@
+com\finsightai\web\service\PasswordResetTokenServiceTest.class
+com\finsightai\web\service\EmailConfirmationTokenServiceTest.class
+com\finsightai\web\service\LoginServiceTest.class
+com\finsightai\web\service\RegisterServiceTest.class

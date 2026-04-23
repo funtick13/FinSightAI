@@ -1,7 +1,8 @@
 package com.finsightai.web.service;
 
-import com.finsightai.web.dto.RegisterRequest;
+import com.finsightai.web.dto.AuthRequest;
 import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.exception.EmailAlreadyExistsException;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -42,7 +44,7 @@ class RegisterServiceTest {
 
     @Test
     void isEmailUniqueReturnsTrueWhenEmailDoesNotExist() {
-        RegisterRequest request = new RegisterRequest("user@example.com", "password");
+        AuthRequest request = new AuthRequest("user@example.com", "password");
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
 
         boolean result = registerService.isEmailUnique(request);
@@ -52,7 +54,7 @@ class RegisterServiceTest {
 
     @Test
     void isEmailUniqueReturnsFalseWhenEmailAlreadyExists() {
-        RegisterRequest request = new RegisterRequest("user@example.com", "password");
+        AuthRequest request = new AuthRequest("user@example.com", "password");
         when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
 
         boolean result = registerService.isEmailUnique(request);
@@ -62,7 +64,7 @@ class RegisterServiceTest {
 
     @Test
     void registerCreatesUnconfirmedUserAndRequestsEmailConfirmationTokenWhenEmailIsUnique() {
-        RegisterRequest request = new RegisterRequest("user@example.com", "plain-password");
+        AuthRequest request = new AuthRequest("user@example.com", "plain-password");
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -86,13 +88,10 @@ class RegisterServiceTest {
 
     @Test
     void registerRejectsRequestWhenEmailAlreadyExists() {
-        RegisterRequest request = new RegisterRequest("user@example.com", "plain-password");
+        AuthRequest request = new AuthRequest("user@example.com", "plain-password");
         when(userRepository.existsByEmail("user@example.com")).thenReturn(true);
 
-        MessageResponse response = registerService.register(request);
-
-        assertFalse(response.isSuccess());
-        assertNotNull(response.getMessage());
+        assertThrows(EmailAlreadyExistsException.class, () -> registerService.register(request));
 
         verify(userRepository, never()).save(any(User.class));
         verifyNoInteractions(passwordEncoder, emailConfirmationTokenService);

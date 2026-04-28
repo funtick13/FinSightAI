@@ -1,42 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
-  runApp(const FinSightApp());
+  runApp(const ProviderScope(child: FinSightApp()));
 }
 
-/// FinSightApp — минимальное Flutter‑приложение, служащее отправной
-/// точкой для проекта FinSight AI.  Сейчас оно отображает простой
-/// домашний экран с приветственным сообщением.  В дальнейшем это будет
-/// заменено полноценным потоком приложения (аутентификация, загрузка
-/// выписок, аналитическая панель и т.д.).
-class FinSightApp extends StatelessWidget {
-  const FinSightApp({Key? key}) : super(key: key);
+class FinSightApp extends ConsumerWidget {
+  const FinSightApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
+    return MaterialApp.router(
       title: 'FinSight AI',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FinSight AI'),
-      ),
-      body: const Center(
-        child: Text('Добро пожаловать в FinSight AI'),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      routerConfig: router,
     );
   }
 }

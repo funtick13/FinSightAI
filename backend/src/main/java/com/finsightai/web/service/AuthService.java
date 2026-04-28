@@ -1,9 +1,6 @@
 package com.finsightai.web.service;
 
-import com.finsightai.web.dto.AuthRequest;
-import com.finsightai.web.dto.ForgotPasswordRequest;
-import com.finsightai.web.dto.MessageResponse;
-import com.finsightai.web.dto.ResetPasswordRequest;
+import com.finsightai.web.dto.*;
 import com.finsightai.web.exception.EmailAlreadyExistsException;
 import com.finsightai.web.exception.EmailNotConfirmedException;
 import com.finsightai.web.exception.InvalidCredentialsException;
@@ -11,6 +8,7 @@ import com.finsightai.web.exception.TokenAlreadyUsedException;
 import com.finsightai.web.exception.TokenExpiredException;
 import com.finsightai.web.exception.TokenNotFoundException;
 import com.finsightai.web.exception.UserNotFoundException;
+import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.PasswordResetToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.PasswordResetTokenRepository;
@@ -29,12 +27,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailConfirmationTokenService emailConfirmationTokenService;
     private final PasswordResetTokenService passwordResetTokenService;
+    private final JwtService jwtService;
 
     public boolean isEmailUnique(AuthRequest authRequest) {
         return !userRepository.existsByEmail(authRequest.getEmail());
     }
 
-    public MessageResponse login(AuthRequest authRequest) {
+    public LoginResponse login(AuthRequest authRequest) {
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(UserNotFoundException::new);
 
@@ -51,7 +50,13 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
-        return new MessageResponse(true, "Авторизация выполнена успешно");
+        String accessToken = jwtService.generateToken(user);
+
+        return new LoginResponse(
+                true,
+                "Авторизация выполнена успешно",
+                accessToken
+                );
     }
 
     public MessageResponse register(AuthRequest request) {
@@ -69,9 +74,14 @@ public class AuthService {
         user.setUpdatedAt(now);
 
         User savedUser = userRepository.save(user);
-        emailConfirmationTokenService.create(savedUser);
+        EmailConfirmationToken token = emailConfirmationTokenService.create(savedUser);
 
-        return new MessageResponse(true, "Аккаунт создан. Подтвердите email для активации учётной записи");
+        String confirmEmailLink = "http://localhost:8080/api/auth/confirm?token=" + token.getToken();
+        System.out.println("Ссылка для подтверждения пароля: " + confirmEmailLink);
+
+        return new MessageResponse(
+                true,
+                "Аккаунт создан. Подтвердите email для активации учётной записи");
     }
 
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {

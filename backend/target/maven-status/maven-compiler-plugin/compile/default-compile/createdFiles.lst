@@ -1,3 +1,5 @@
+com\finsightai\web\service\JpaUserDetailsService.class
 com\finsightai\web\service\JwtService.class
 com\finsightai\web\service\EmailConfirmationTokenService.class
 com\finsightai\web\service\AuthService.class
+com\finsightai\web\configuration\JwtAuthenticationFilter.class

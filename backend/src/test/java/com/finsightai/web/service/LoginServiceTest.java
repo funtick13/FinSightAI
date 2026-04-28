@@ -1,7 +1,7 @@
 package com.finsightai.web.service;
 
 import com.finsightai.web.dto.AuthRequest;
-import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.dto.LoginResponse;
 import com.finsightai.web.exception.EmailNotConfirmedException;
 import com.finsightai.web.exception.InvalidCredentialsException;
 import com.finsightai.web.exception.UserNotFoundException;
@@ -42,6 +42,9 @@ class LoginServiceTest {
     @Mock
     private PasswordResetTokenService passwordResetTokenService;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -51,12 +54,15 @@ class LoginServiceTest {
         User user = confirmedUser();
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("plain-password", "encoded-password")).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn("jwt-token");
 
-        MessageResponse response = authService.login(request);
+        LoginResponse response = authService.login(request);
 
         assertTrue(response.isSuccess());
         assertNotNull(response.getMessage());
+        assertNotNull(response.getAccessToken());
         verify(passwordEncoder).matches("plain-password", "encoded-password");
+        verify(jwtService).generateToken(user);
         verifyNoInteractions(emailConfirmationTokenService, passwordResetTokenService, passwordResetTokenRepository);
     }
 

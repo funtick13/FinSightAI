@@ -1,9 +1,6 @@
 package com.finsightai.web.controller;
 
-import com.finsightai.web.dto.ForgotPasswordRequest;
-import com.finsightai.web.dto.AuthRequest;
-import com.finsightai.web.dto.MessageResponse;
-import com.finsightai.web.dto.ResetPasswordRequest;
+import com.finsightai.web.dto.*;
 import com.finsightai.web.service.AuthService;
 import com.finsightai.web.service.EmailConfirmationTokenService;
 import jakarta.validation.Valid;
@@ -18,7 +15,7 @@ public class AuthController {
     private final EmailConfirmationTokenService emailConfirmationTokenService;
 
     @PostMapping("/login")
-    public MessageResponse login(@Valid @RequestBody AuthRequest loginRequest) {
+    public LoginResponse login(@Valid @RequestBody AuthRequest loginRequest) {
         return authService.login(loginRequest);
     }
 
@@ -40,5 +37,10 @@ public class AuthController {
     @PutMapping("/reset-password")
     public MessageResponse resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "JWT работает";
     }
 }

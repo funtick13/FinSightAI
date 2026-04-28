@@ -24,6 +24,5 @@ public abstract class TokenService<T extends UserToken> {
 
         return repository.save(token);
     }
-
     protected abstract T createToken();
 }

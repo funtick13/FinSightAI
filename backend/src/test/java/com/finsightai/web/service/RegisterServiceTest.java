@@ -3,6 +3,7 @@ package com.finsightai.web.service;
 import com.finsightai.web.dto.AuthRequest;
 import com.finsightai.web.dto.MessageResponse;
 import com.finsightai.web.exception.EmailAlreadyExistsException;
+import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class RegisterServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService registerService;
 
@@ -68,6 +72,9 @@ class RegisterServiceTest {
         when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        EmailConfirmationToken token = new EmailConfirmationToken();
+        token.setToken("confirm-token");
+        when(emailConfirmationTokenService.create(any(User.class))).thenReturn(token);
 
         MessageResponse response = registerService.register(request);
 

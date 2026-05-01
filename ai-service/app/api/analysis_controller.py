@@ -1,10 +1,10 @@
 from uuid import uuid4
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.schemas import AnalysisRequest, AnalysisResponse
 from app.schemas.analysis.enums import AnalysisStatus, FinancialState
-
+from app.service.analysis_service import AnalysisService, get_analysis_service
 
 router = APIRouter(
     prefix="/analysis",
@@ -13,16 +13,8 @@ router = APIRouter(
 
 
 @router.post("", response_model=AnalysisResponse)
-def analyze_finances(request: AnalysisRequest) -> AnalysisResponse:
-    return AnalysisResponse(
-        request_id=uuid4(),
-        user_id=request.user_id,
-        period=request.period,
-        status=AnalysisStatus.SUCCESS,
-        summary=None,
-        financial_state=FinancialState.NO_DATA,
-        category_analytics=[],
-        top_categories=[],
-        insights=[],
-        recommendations=[],
-    )
+def analyze_finances(
+        request: AnalysisRequest,
+        service: AnalysisService = Depends(get_analysis_service)
+) -> AnalysisResponse:
+    return service.analyze(request)

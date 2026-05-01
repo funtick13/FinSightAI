@@ -1,0 +1,388 @@
+openapi: 3.0.3
+
+info:
+  title: FinSight AI Service API
+  version: 1.0.0
+  description: >
+    REST API contract between the backend and the AI service. The backend sends
+    normalized financial data as JSON. The AI service does not parse PDF files,
+    change transaction categories, or infer transaction types.
+
+servers:
+  - url: http://localhost:8000
+    description: Local AI service
+
+tags:
+  - name: Health
+    description: Service health check
+  - name: Analysis
+    description: Financial transaction analysis
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Check AI service availability
+      operationId: getHealth
+      responses:
+        "200":
+          description: AI service is available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: OK
+
+  /analysis:
+    post:
+      tags:
+        - Analysis
+      summary: Analyze normalized financial transactions
+      operationId: analyzeTransactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalysisRequest"
+            example:
+              requestId: 11111111-1111-1111-1111-111111111111
+              userId: 22222222-2222-2222-2222-222222222222
+              period: "2026-04"
+              bank: SBERBANK
+              statementIds:
+                - 33333333-3333-3333-3333-333333333333
+              statementPeriod:
+                from: "2026-03-20"
+                to: "2026-04-18"
+              statementSummary:
+                openingBalance: 890.03
+                totalIncome: 13058.26
+                totalExpense: 13780.40
+                closingBalance: 167.89
+              transactions:
+                - id: 44444444-4444-4444-4444-444444444444
+                  date: "2026-04-16"
+                  time: "19:28"
+                  type: EXPENSE
+                  amount: 37.00
+                  category: Transport
+                  description: TPP_VPT SBERTROJKA Voronezh RUS. Card operation ****4188
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal AI service error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+          example: OK
+
+    AnalysisRequest:
+      type: object
+      required:
+        - requestId
+        - userId
+        - period
+        - bank
+        - statementIds
+        - statementPeriod
+        - statementSummary
+        - transactions
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        period:
+          type: string
+          example: "2026-04"
+        bank:
+          type: string
+          example: SBERBANK
+        statementIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        statementPeriod:
+          $ref: "#/components/schemas/StatementPeriodDto"
+        statementSummary:
+          $ref: "#/components/schemas/StatementSummaryDto"
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionDto"
+
+    StatementPeriodDto:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          type: string
+          format: date
+          example: "2026-03-20"
+        to:
+          type: string
+          format: date
+          example: "2026-04-18"
+
+    StatementSummaryDto:
+      type: object
+      required:
+        - openingBalance
+        - totalIncome
+        - totalExpense
+        - closingBalance
+      properties:
+        openingBalance:
+          type: number
+          format: double
+          example: 890.03
+        totalIncome:
+          type: number
+          format: double
+          example: 13058.26
+        totalExpense:
+          type: number
+          format: double
+          example: 13780.40
+        closingBalance:
+          type: number
+          format: double
+          example: 167.89
+
+    TransactionDto:
+      type: object
+      required:
+        - id
+        - date
+        - type
+        - amount
+        - category
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+          example: "2026-04-16"
+        time:
+          type: string
+          pattern: "^\\d{2}:\\d{2}$"
+          nullable: true
+          example: "19:28"
+        type:
+          $ref: "#/components/schemas/TransactionType"
+        amount:
+          type: number
+          format: double
+          example: 37.00
+        category:
+          type: string
+          example: Transport
+        description:
+          type: string
+          nullable: true
+          example: TPP_VPT SBERTROJKA Voronezh RUS. Card operation ****4188
+
+    TransactionType:
+      type: string
+      enum:
+        - INCOME
+        - EXPENSE
+
+    AnalysisResponse:
+      type: object
+      required:
+        - requestId
+        - userId
+        - period
+        - status
+        - summary
+        - financialState
+        - categoryAnalytics
+        - topCategories
+        - insights
+        - recommendations
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        period:
+          type: string
+          example: "2026-04"
+        status:
+          $ref: "#/components/schemas/AnalysisStatus"
+        summary:
+          $ref: "#/components/schemas/SummaryDto"
+        financialState:
+          type: string
+          example: STABLE
+        categoryAnalytics:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryAnalyticsDto"
+        topCategories:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/CategoryAnalyticsDto"
+        insights:
+          type: array
+          items:
+            $ref: "#/components/schemas/InsightDto"
+        recommendations:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/RecommendationDto"
+
+    SummaryDto:
+      type: object
+      required:
+        - totalIncome
+        - totalExpense
+        - balance
+        - period
+      properties:
+        totalIncome:
+          type: number
+          format: double
+          example: 13058.26
+        totalExpense:
+          type: number
+          format: double
+          example: 13780.40
+        balance:
+          type: number
+          format: double
+          example: -722.14
+        period:
+          type: string
+          example: "2026-04"
+
+    CategoryAnalyticsDto:
+      type: object
+      required:
+        - category
+        - amount
+        - percent
+        - operationsCount
+      properties:
+        category:
+          type: string
+          example: Transport
+        amount:
+          type: number
+          format: double
+          example: 37.00
+        percent:
+          type: number
+          format: double
+          example: 12.5
+        operationsCount:
+          type: integer
+          example: 1
+
+    InsightDto:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          example: Transport expenses increased this month.
+        category:
+          type: string
+          nullable: true
+          example: Transport
+        metrics:
+          type: object
+          nullable: true
+          additionalProperties: true
+
+    RecommendationDto:
+      type: object
+      required:
+        - text
+        - type
+      properties:
+        text:
+          type: string
+          example: Review recurring transport expenses.
+        type:
+          $ref: "#/components/schemas/RecommendationType"
+        categories:
+          type: array
+          items:
+            type: string
+          example:
+            - Transport
+        metrics:
+          type: object
+          nullable: true
+          additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          $ref: "#/components/schemas/AnalysisStatus"
+        message:
+          type: string
+          example: Invalid input JSON
+
+    AnalysisStatus:
+      type: string
+      enum:
+        - SUCCESS
+        - NO_DATA
+        - INVALID_INPUT
+        - ANALYSIS_ERROR
+        - INTERNAL_ERROR
+
+    RecommendationType:
+      type: string
+      enum:
+        - EXPENSE_OPTIMIZATION
+        - SAVING
+        - WARNING
+        - BUDGET_CONTROL
+        - GENERAL_ADVICE

@@ -1,0 +1,9 @@
+from enum import Enum
+
+
+class RecommendationType(str, Enum):
+    EXPENSE_OPTIMIZATION = "EXPENSE_OPTIMIZATION"
+    BUDGET_CONTROL = "BUDGET_CONTROL"
+    SAVING = "SAVING"
+    WARNING = "WARNING"
+    GENERAL_ADVICE = "GENERAL_ADVICE"

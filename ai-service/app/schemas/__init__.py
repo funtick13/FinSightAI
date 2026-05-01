@@ -1,9 +1,12 @@
-from app.schemas.analysis.analysis_request import (
+from .analysis import (
     AnalysisRequest,
-    StatementPeriodDto,
-    StatementSummaryDto,
+    AnalysisResponse,
+    CategoryAnalyticsDto,
+    InsightDto,
+    RecommendationDto,
+    SummaryDto,
+    TransactionDto,
 )
-from app.schemas.transaction_dto import TransactionDto, TransactionType
 
 __all__ = [
     "AnalysisRequest",
@@ -11,9 +14,6 @@ __all__ = [
     "CategoryAnalyticsDto",
     "InsightDto",
     "RecommendationDto",
-    "StatementPeriodDto",
-    "StatementSummaryDto",
     "SummaryDto",
     "TransactionDto",
-    "TransactionType",
 ]

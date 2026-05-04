@@ -13,6 +13,9 @@ class StatePredictor:
         if analytics.transaction_count == 0:
             return FinancialState.NO_DATA
 
+        if analytics.balance < 0:
+            return FinancialState.RISKY
+
         ratio = self._calculate_income_expense_ratio(
             total_income=analytics.total_income,
             total_expense=analytics.total_expense,
@@ -46,10 +49,7 @@ class StatePredictor:
         if not analytics.category_analytics:
             return Decimal("0.00")
 
-        return max(
-            category.percent
-            for category in analytics.category_analytics
-        )
+        return max(category.percent for category in analytics.category_analytics)
 
     def _has_low_savings(self, analytics: AnalyticsResult) -> bool:
         if analytics.total_income <= 0:

@@ -6,7 +6,7 @@ from app.schemas.analysis.category_analytics_dto import CategoryAnalyticsDto
 from app.schemas.analysis.enums.analysis_status import AnalysisStatus
 from app.schemas.analysis.enums.financial_state import FinancialState
 from app.schemas.insight.insight_dto import InsightDto
-from app.schemas.analysis.recommendation_dto import RecommendationDto
+from app.schemas.recommendation.recommendation_dto import RecommendationDto
 from app.schemas.analysis.summary_dto import SummaryDto
 
 

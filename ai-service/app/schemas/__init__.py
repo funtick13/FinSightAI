@@ -2,18 +2,28 @@ from .analysis import (
     AnalysisRequest,
     AnalysisResponse,
     CategoryAnalyticsDto,
-    InsightDto,
-    RecommendationDto,
+    StatementSummaryDto,
     SummaryDto,
     TransactionDto,
+)
+
+from .insight import (
+InsightDto
+)
+
+from .recommendation import (
+RecommendationDto
 )
 
 __all__ = [
     "AnalysisRequest",
     "AnalysisResponse",
     "CategoryAnalyticsDto",
-    "InsightDto",
-    "RecommendationDto",
+    "StatementSummaryDto",
     "SummaryDto",
     "TransactionDto",
+
+    "InsightDto",
+
+    "RecommendationDto",
 ]

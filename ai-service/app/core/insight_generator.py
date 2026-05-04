@@ -1,9 +1,12 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from app.core.models.analytics_result import AnalyticsResult
-from app.schemas.insight.insight_dto import InsightDto
+from app.core.models.detected_pattern import DetectedPattern
 from app.schemas.analysis.enums import FinancialState
+
 from app.schemas.insight.enums import InsightType
+from app.schemas.insight.insight_dto import InsightDto
+from app.schemas.pattern.enums import PatternType
 
 
 class InsightGenerator:
@@ -13,11 +16,12 @@ class InsightGenerator:
             self,
             analytics: AnalyticsResult,
             financial_state: FinancialState,
+            patterns: list[DetectedPattern],
     ) -> list[InsightDto]:
         if analytics.transaction_count == 0:
             return [
                 InsightDto(
-                    type=InsightType.NO_INCOME,
+                    type=InsightType.GENERAL,
                     text="Недостаточно данных для анализа финансового поведения.",
                     data=None,
                 )
@@ -26,8 +30,7 @@ class InsightGenerator:
         insights: list[InsightDto] = []
 
         self._add_top_category_insight(analytics, insights)
-        self._add_top_three_categories_insight(analytics, insights)
-        self._add_income_expense_insight(analytics, insights)
+        self._add_pattern_insights(patterns, insights)
         self._add_state_explanation(financial_state, insights)
 
         return insights[:self.MAX_INSIGHTS]
@@ -58,89 +61,138 @@ class InsightGenerator:
             )
         )
 
-    def _add_top_three_categories_insight(
+    def _add_pattern_insights(
             self,
-            analytics: AnalyticsResult,
+            patterns: list[DetectedPattern],
             insights: list[InsightDto],
     ) -> None:
-        if len(analytics.top_categories) < 3:
-            return
+        for pattern in patterns:
+            if pattern.type == PatternType.EXPENSES_EXCEED_INCOME:
+                self._add_expenses_exceed_income_insight(pattern, insights)
 
-        percent_top3 = sum(
-            category.percent for category in analytics.top_categories
-        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            elif pattern.type == PatternType.HIGH_CONCENTRATION:
+                self._add_high_concentration_insight(pattern, insights)
 
-        category_names = [
-            category.category for category in analytics.top_categories
-        ]
+            elif pattern.type == PatternType.TOP3_DOMINANCE:
+                self._add_top3_dominance_insight(pattern, insights)
 
-        insights.append(
-            InsightDto(
-                type=InsightType.HIGH_CONCENTRATION,
-                text=(
-                    f"Три основные категории составляют {percent_top3} % "
-                    f"всех расходов: {', '.join(category_names)}."
-                ),
-                data={
-                    "percentTop3": str(percent_top3),
-                    "categories": category_names,
-                },
-            )
-        )
+            elif pattern.type == PatternType.LARGE_SINGLE_EXPENSE:
+                self._add_large_expense_insight(pattern, insights)
 
-    def _add_income_expense_insight(
+            elif pattern.type == PatternType.FREQUENT_SMALL_EXPENSES:
+                self._add_frequent_small_expenses_insight(pattern, insights)
+
+            elif pattern.type == PatternType.NO_INCOME:
+                self._add_no_income_insight(pattern, insights)
+
+    def _add_expenses_exceed_income_insight(
             self,
-            analytics: AnalyticsResult,
+            pattern: DetectedPattern,
             insights: list[InsightDto],
     ) -> None:
-        if analytics.total_income <= 0:
-            insights.append(
-                InsightDto(
-                    type=InsightType.NO_INCOME,
-                    text=(
-                        "За анализируемый период доходов не зафиксировано. "
-                        "При активных расходах это может привести к дефициту бюджета."
-                    ),
-                    data=None,
-                )
-            )
-            return
-
-        if analytics.balance < 0:
-            diff_percent = (
-                    abs(analytics.balance) / analytics.total_income * Decimal("100")
-            ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-
-            insights.append(
-                InsightDto(
-                    type=InsightType.INCOME_EXPENSE_RATIO,
-                    text=(
-                        f"Ваши расходы превышают доходы на {diff_percent} %, "
-                        f"что приводит к отрицательному балансу."
-                    ),
-                    data={
-                        "diffPercent": str(diff_percent),
-                        "balance": str(analytics.balance),
-                    },
-                )
-            )
-            return
-
-        diff_percent = (
-                analytics.balance / analytics.total_income * Decimal("100")
-        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        difference = pattern.data.get("difference")
 
         insights.append(
             InsightDto(
                 type=InsightType.INCOME_EXPENSE_RATIO,
                 text=(
-                    f"Ваши доходы превышают расходы на {diff_percent} % — "
-                    f"вы сохраняете положительный баланс."
+                    f"Ваши расходы превышают доходы на {difference} ₽, "
+                    "что приводит к отрицательному балансу."
                 ),
-                data={
-                    "diffPercent": str(diff_percent),
-                    "balance": str(analytics.balance),
-                },
+                data=pattern.data,
+            )
+        )
+
+    def _add_high_concentration_insight(
+            self,
+            pattern: DetectedPattern,
+            insights: list[InsightDto],
+    ) -> None:
+        category = pattern.data.get("category")
+        percent = pattern.data.get("percent")
+
+        insights.append(
+            InsightDto(
+                type=InsightType.HIGH_CONCENTRATION,
+                text=(
+                    f"Категория «{category}» занимает {percent} % всех расходов, "
+                    "что превышает рекомендованный порог."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_top3_dominance_insight(
+            self,
+            pattern: DetectedPattern,
+            insights: list[InsightDto],
+    ) -> None:
+        percent = pattern.data.get("percent")
+        categories = pattern.data.get("categories", [])
+
+        insights.append(
+            InsightDto(
+                type=InsightType.HIGH_CONCENTRATION,
+                text=(
+                    f"Три основные категории составляют {percent} % всех расходов: "
+                    f"{', '.join(categories)}."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_large_expense_insight(
+            self,
+            pattern: DetectedPattern,
+            insights: list[InsightDto],
+    ) -> None:
+        amount = pattern.data.get("amount")
+        percent = pattern.data.get("percent")
+        category = pattern.data.get("category")
+
+        insights.append(
+            InsightDto(
+                type=InsightType.LARGE_EXPENSE,
+                text=(
+                    f"У вас была крупная трата в категории «{category}» "
+                    f"на {amount} ₽ — это {percent} % от всех расходов."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_frequent_small_expenses_insight(
+            self,
+            pattern: DetectedPattern,
+            insights: list[InsightDto],
+    ) -> None:
+        small_count = pattern.data.get("smallCount")
+        amount = pattern.data.get("amount")
+
+        insights.append(
+            InsightDto(
+                type=InsightType.SMALL_EXPENSES,
+                text=(
+                    f"Вы совершили {small_count} небольших покупок. "
+                    f"В сумме они составили {amount} ₽."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_no_income_insight(
+            self,
+            pattern: DetectedPattern,
+            insights: list[InsightDto],
+    ) -> None:
+        insights.append(
+            InsightDto(
+                type=InsightType.NO_INCOME,
+                text=(
+                    "За анализируемый период доходов не зафиксировано. "
+                    "При активных расходах это может привести к дефициту бюджета."
+                ),
+                data=pattern.data,
             )
         )
 
@@ -149,37 +201,25 @@ class InsightGenerator:
             financial_state: FinancialState,
             insights: list[InsightDto],
     ) -> None:
-        if financial_state == FinancialState.EXPENSE_HEAVY:
-            insights.append(
-                InsightDto(
-                    type=InsightType.HIGH_CONCENTRATION,
-                    text=(
-                        "В расходах заметна высокая концентрация: "
-                        "значительная часть бюджета приходится на одну или несколько категорий."
-                    ),
-                    data={"financialState": financial_state.value},
-                )
-            )
-
-        if financial_state == FinancialState.LOW_SAVINGS:
-            insights.append(
-                InsightDto(
-                    type=InsightType.INCOME_EXPENSE_RATIO,
-                    text=(
-                        "Доходы превышают расходы, но свободный остаток небольшой. "
-                        "Это снижает потенциал накоплений."
-                    ),
-                    data={"financialState": financial_state.value},
-                )
-            )
-
         if financial_state == FinancialState.RISKY:
             insights.append(
                 InsightDto(
                     type=InsightType.INCOME_EXPENSE_RATIO,
                     text=(
                         "Финансовое состояние выглядит рискованным: "
-                        "расходы заметно превышают доходы."
+                        "расходы превышают доходы."
+                    ),
+                    data={"financialState": financial_state.value},
+                )
+            )
+
+        elif financial_state == FinancialState.LOW_SAVINGS:
+            insights.append(
+                InsightDto(
+                    type=InsightType.INCOME_EXPENSE_RATIO,
+                    text=(
+                        "Доходы превышают расходы, но свободный остаток небольшой. "
+                        "Это снижает потенциал накоплений."
                     ),
                     data={"financialState": financial_state.value},
                 )

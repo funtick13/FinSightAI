@@ -1,7 +1,8 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from app.core.models.analytics_result import AnalyticsResult
-from app.schemas.analysis.enums import FinancialState, RecommendationType
+from app.schemas.analysis.enums import FinancialState
+from app.schemas.recommendation.enum import RecommendationType
 from app.schemas.recommendation.recommendation_dto import RecommendationDto
 
 

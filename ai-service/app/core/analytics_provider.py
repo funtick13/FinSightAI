@@ -1,9 +1,8 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from app.core.models.analytics_result import AnalyticsResult
 from app.core.models.category_aggregate import CategoryAggregate
 from app.schemas.analysis import AnalysisRequest, CategoryAnalyticsDto
-from app.schemas.analysis.transaction_dto import TransactionType
 
 
 class AnalyticsProvider:
@@ -29,15 +28,15 @@ class AnalyticsProvider:
         category_analytics: list[CategoryAnalyticsDto] = []
 
         for category_name, aggregate in categories.items():
-            percent = Decimal("0")
-
-            if total_expense > 0:
-                percent = (aggregate.amount / total_expense) * Decimal("100")
+            percent = self._calculate_percent(
+                amount=aggregate.amount,
+                total_expense=total_expense,
+            )
 
             category_analytics.append(
                 CategoryAnalyticsDto(
                     category=category_name,
-                    amount=aggregate.amount,
+                    amount=self._round_money(aggregate.amount),
                     percent=percent,
                     operations_count=aggregate.count,
                 )
@@ -48,13 +47,24 @@ class AnalyticsProvider:
             reverse=True,
         )
 
-        top_categories = category_analytics[:3]
-
         return AnalyticsResult(
-            total_income=total_income,
-            total_expense=total_expense,
-            balance=balance,
+            total_income=self._round_money(total_income),
+            total_expense=self._round_money(total_expense),
+            balance=self._round_money(balance),
             transaction_count=len(request.transactions),
             category_analytics=category_analytics,
-            top_categories=top_categories,
+            top_categories=category_analytics[:3],
         )
+
+    @staticmethod
+    def _calculate_percent(amount: Decimal, total_expense: Decimal) -> Decimal:
+        if total_expense <= 0:
+            return Decimal("0.00")
+
+        return (
+                amount / total_expense * Decimal("100")
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    @staticmethod
+    def _round_money(value: Decimal) -> Decimal:
+        return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)

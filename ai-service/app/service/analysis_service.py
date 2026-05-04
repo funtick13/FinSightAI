@@ -36,7 +36,8 @@ class AnalysisService:
         )
         recommendations = self.recommendation_generator.generate(
             analytics=analytics,
-            financial_state=financial_state
+            financial_state=financial_state,
+            patterns=patterns,
         )
 
         return AnalysisResponse(

@@ -1,146 +1,241 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 
 from app.core.models.analytics_result import AnalyticsResult
+from app.core.models.detected_pattern import DetectedPattern
 from app.schemas.analysis.enums import FinancialState
+from app.schemas.pattern.enums import PatternType
 from app.schemas.recommendation.enum import RecommendationType
 from app.schemas.recommendation.recommendation_dto import RecommendationDto
 
 
 class RecommendationGenerator:
-    MIN_RECOMMENDATIONS = 2
     MAX_RECOMMENDATIONS = 5
 
-    TOP_CATEGORY_TARGET_REDUCTION = Decimal("10.00")
-    TOP_CATEGORY_GOAL_PERCENT = Decimal("30.00")
+    TARGET_REDUCTION_PERCENT = Decimal("10.00")
     SAVING_TARGET_PERCENT = Decimal("10.00")
 
     def generate(
             self,
             analytics: AnalyticsResult,
             financial_state: FinancialState,
+            patterns: list[DetectedPattern],
     ) -> list[RecommendationDto]:
         recommendations: list[RecommendationDto] = []
 
-        self._add_risky_recommendations(analytics, financial_state, recommendations)
-        self._add_top_category_recommendation(analytics, recommendations)
-        self._add_saving_recommendation(analytics, financial_state, recommendations)
-        self._add_no_income_recommendation(analytics, recommendations)
+        self._add_pattern_recommendations(patterns, recommendations)
+        self._add_state_recommendations(
+            analytics=analytics,
+            financial_state=financial_state,
+            recommendations=recommendations,
+        )
         self._add_general_recommendations(recommendations)
 
         return recommendations[:self.MAX_RECOMMENDATIONS]
 
-    def _add_risky_recommendations(
+    def _add_pattern_recommendations(
             self,
-            analytics: AnalyticsResult,
-            financial_state: FinancialState,
+            patterns: list[DetectedPattern],
             recommendations: list[RecommendationDto],
     ) -> None:
-        if financial_state != FinancialState.RISKY:
-            return
-
-        if analytics.total_income > 0 and analytics.balance < 0:
-            diff_percent = (
-                    abs(analytics.balance) / analytics.total_income * Decimal("100")
-            ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-
-            recommendations.append(
-                RecommendationDto(
-                    type=RecommendationType.BUDGET_CONTROL,
-                    text=(
-                        f"Ваши расходы превышают доходы на {diff_percent} %. "
-                        "Рассмотрите возможность временно ограничить необязательные траты, "
-                        "чтобы восстановить баланс."
-                    ),
-                    data={
-                        "diffPercent": str(diff_percent),
-                        "balance": str(analytics.balance),
-                    },
+        for pattern in patterns:
+            if pattern.type == PatternType.EXPENSES_EXCEED_INCOME:
+                self._add_expenses_exceed_income_recommendation(
+                    pattern,
+                    recommendations,
                 )
-            )
 
-    def _add_top_category_recommendation(
+            elif pattern.type == PatternType.HIGH_CONCENTRATION:
+                self._add_high_concentration_recommendation(
+                    pattern,
+                    recommendations,
+                )
+
+            elif pattern.type == PatternType.TOP3_DOMINANCE:
+                self._add_top3_dominance_recommendation(
+                    pattern,
+                    recommendations,
+                )
+
+            elif pattern.type == PatternType.LARGE_SINGLE_EXPENSE:
+                self._add_large_expense_recommendation(
+                    pattern,
+                    recommendations,
+                )
+
+            elif pattern.type == PatternType.FREQUENT_SMALL_EXPENSES:
+                self._add_frequent_small_expenses_recommendation(
+                    pattern,
+                    recommendations,
+                )
+
+            elif pattern.type == PatternType.NO_INCOME:
+                self._add_no_income_recommendation(
+                    pattern,
+                    recommendations,
+                )
+
+    def _add_expenses_exceed_income_recommendation(
             self,
-            analytics: AnalyticsResult,
+            pattern: DetectedPattern,
             recommendations: list[RecommendationDto],
     ) -> None:
-        if not analytics.top_categories:
-            return
+        difference = pattern.data.get("difference")
 
-        top_category = analytics.top_categories[0]
+        recommendations.append(
+            RecommendationDto(
+                type=RecommendationType.BUDGET_CONTROL,
+                text=(
+                    f"Ваши расходы превышают доходы на {difference} ₽. "
+                    "Рассмотрите возможность временно ограничить необязательные траты "
+                    "или увеличить доходы, чтобы восстановить баланс."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_high_concentration_recommendation(
+            self,
+            pattern: DetectedPattern,
+            recommendations: list[RecommendationDto],
+    ) -> None:
+        category = pattern.data.get("category")
+        percent = pattern.data.get("percent")
 
         recommendations.append(
             RecommendationDto(
                 type=RecommendationType.EXPENSE_OPTIMIZATION,
                 text=(
-                    f"Категория «{top_category.category}» занимает "
-                    f"{top_category.percent} % всех расходов. "
+                    f"Категория «{category}» занимает {percent} % всех расходов. "
                     f"Попробуйте сократить траты в этой категории на "
-                    f"{self.TOP_CATEGORY_TARGET_REDUCTION} %, чтобы снизить её долю "
-                    f"до более комфортного уровня."
+                    f"{self.TARGET_REDUCTION_PERCENT} %, чтобы снизить нагрузку на бюджет."
                 ),
                 data={
-                    "category": top_category.category,
-                    "currentPercent": str(top_category.percent),
-                    "targetReductionPercent": str(self.TOP_CATEGORY_TARGET_REDUCTION),
-                    "goalPercent": str(self.TOP_CATEGORY_GOAL_PERCENT),
-                    "amount": str(top_category.amount),
+                    **pattern.data,
+                    "targetReductionPercent": str(self.TARGET_REDUCTION_PERCENT),
                 },
             )
         )
 
-    def _add_saving_recommendation(
+    def _add_top3_dominance_recommendation(
             self,
-            analytics: AnalyticsResult,
-            financial_state: FinancialState,
+            pattern: DetectedPattern,
             recommendations: list[RecommendationDto],
     ) -> None:
-        if financial_state not in {
-            FinancialState.LOW_SAVINGS,
-            FinancialState.STABLE,
-            FinancialState.RISKY,
-        }:
-            return
+        percent = pattern.data.get("percent")
+        categories = pattern.data.get("categories", [])
 
         recommendations.append(
             RecommendationDto(
-                type=RecommendationType.SAVING,
+                type=RecommendationType.EXPENSE_OPTIMIZATION,
                 text=(
-                    f"Старайтесь откладывать хотя бы {self.SAVING_TARGET_PERCENT} % "
-                    "дохода на резервный фонд. Это поможет справляться с "
-                    "непредвиденными расходами."
+                    f"Три основные категории занимают {percent} % всех расходов: "
+                    f"{', '.join(categories)}. "
+                    "Рекомендуется установить лимиты по этим направлениям, "
+                    "чтобы снизить концентрацию трат."
                 ),
-                data={
-                    "savePercent": str(self.SAVING_TARGET_PERCENT),
-                    "totalIncome": str(analytics.total_income),
-                    "balance": str(analytics.balance),
-                },
+                data=pattern.data,
+            )
+        )
+
+    def _add_large_expense_recommendation(
+            self,
+            pattern: DetectedPattern,
+            recommendations: list[RecommendationDto],
+    ) -> None:
+        amount = pattern.data.get("amount")
+        percent = pattern.data.get("percent")
+        category = pattern.data.get("category")
+
+        recommendations.append(
+            RecommendationDto(
+                type=RecommendationType.EXPENSE_OPTIMIZATION,
+                text=(
+                    f"Крупная трата в категории «{category}» составила {amount} ₽ "
+                    f"или {percent} % всех расходов. "
+                    "Рассмотрите возможность планировать такие покупки заранее "
+                    "или распределять их на несколько периодов."
+                ),
+                data=pattern.data,
+            )
+        )
+
+    def _add_frequent_small_expenses_recommendation(
+            self,
+            pattern: DetectedPattern,
+            recommendations: list[RecommendationDto],
+    ) -> None:
+        small_count = pattern.data.get("smallCount")
+        amount = pattern.data.get("amount")
+
+        recommendations.append(
+            RecommendationDto(
+                type=RecommendationType.EXPENSE_OPTIMIZATION,
+                text=(
+                    f"Вы совершили {small_count} небольших покупок на сумму {amount} ₽. "
+                    "Попробуйте отслеживать микротраты: в сумме они могут заметно влиять "
+                    "на бюджет."
+                ),
+                data=pattern.data,
             )
         )
 
     def _add_no_income_recommendation(
             self,
-            analytics: AnalyticsResult,
+            pattern: DetectedPattern,
             recommendations: list[RecommendationDto],
     ) -> None:
-        if analytics.total_income > 0:
-            return
-
-        if analytics.total_expense <= 0:
-            return
+        total_expense = pattern.data.get("totalExpense")
 
         recommendations.append(
             RecommendationDto(
                 type=RecommendationType.WARNING,
                 text=(
                     f"За текущий период доходов не зафиксировано, но расходы составили "
-                    f"{analytics.total_expense} ₽. При отсутствии поступлений "
-                    "рекомендуется сократить необязательные траты."
+                    f"{total_expense} ₽. До появления новых поступлений рекомендуется "
+                    "сократить необязательные траты."
                 ),
-                data={
-                    "totalExpense": str(analytics.total_expense),
-                },
+                data=pattern.data,
             )
         )
+
+    def _add_state_recommendations(
+            self,
+            analytics: AnalyticsResult,
+            financial_state: FinancialState,
+            recommendations: list[RecommendationDto],
+    ) -> None:
+        if financial_state == FinancialState.LOW_SAVINGS:
+            recommendations.append(
+                RecommendationDto(
+                    type=RecommendationType.SAVING,
+                    text=(
+                        f"Свободный остаток за период составляет {analytics.balance} ₽. "
+                        f"Постарайтесь увеличить накопления, откладывая хотя бы "
+                        f"{self.SAVING_TARGET_PERCENT} % дохода."
+                    ),
+                    data={
+                        "balance": str(analytics.balance),
+                        "savePercent": str(self.SAVING_TARGET_PERCENT),
+                        "totalIncome": str(analytics.total_income),
+                    },
+                )
+            )
+
+        elif financial_state == FinancialState.STABLE:
+            recommendations.append(
+                RecommendationDto(
+                    type=RecommendationType.SAVING,
+                    text=(
+                        f"Финансовое состояние выглядит стабильным. "
+                        f"Попробуйте регулярно направлять около "
+                        f"{self.SAVING_TARGET_PERCENT} % дохода в резервный фонд."
+                    ),
+                    data={
+                        "savePercent": str(self.SAVING_TARGET_PERCENT),
+                        "totalIncome": str(analytics.total_income),
+                    },
+                )
+            )
 
     def _add_general_recommendations(
             self,

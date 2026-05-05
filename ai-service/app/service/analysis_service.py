@@ -4,7 +4,7 @@ from app.core.pattern_detector import PatternDetector
 from app.core.recommendation_generator import RecommendationGenerator
 from app.core.state_predictor import StatePredictor
 from app.schemas.analysis import AnalysisRequest, AnalysisResponse, SummaryDto
-from app.schemas.analysis.enums import AnalysisStatus
+from app.schemas.analysis.enums import AnalysisStatus, FinancialState
 
 
 class AnalysisService:
@@ -23,53 +23,116 @@ class AnalysisService:
         self.pattern_detector = pattern_detector
 
     def analyze(self, request: AnalysisRequest) -> AnalysisResponse:
-        analytics = self.analytics_provider.calculate(request)
-        patterns = self.pattern_detector.detect(
-            analytics=analytics,
-            request=request,
-        )
-        financial_state = self.state_predictor.predict(analytics)
-        insights = self.insight_generator.generate(
-            analytics=analytics,
-            financial_state=financial_state,
-            patterns=patterns,
-        )
-        recommendations = self.recommendation_generator.generate(
-            analytics=analytics,
-            financial_state=financial_state,
-            patterns=patterns,
-        )
+        if not request.transactions:
+            return self._no_data_response(request)
 
+        try:
+            analytics = self.analytics_provider.calculate(request)
+
+            if analytics.transaction_count == 0:
+                return self._no_data_response(request)
+
+            patterns = self.pattern_detector.detect(
+                analytics=analytics,
+                request=request,
+            )
+
+            financial_state = self.state_predictor.predict(analytics)
+
+            insights = self.insight_generator.generate(
+                analytics=analytics,
+                financial_state=financial_state,
+                patterns=patterns,
+            )
+
+            recommendations = self.recommendation_generator.generate(
+                analytics=analytics,
+                financial_state=financial_state,
+                patterns=patterns,
+            )
+
+            return AnalysisResponse(
+                request_id=request.request_id,
+                user_id=request.user_id,
+                period=request.period,
+                status=AnalysisStatus.SUCCESS,
+                summary=SummaryDto(
+                    total_income=analytics.total_income,
+                    total_expense=analytics.total_expense,
+                    balance=analytics.balance,
+                    period=request.period,
+                ),
+                financial_state=financial_state,
+                category_analytics=analytics.category_analytics,
+                top_categories=analytics.top_categories,
+                insights=insights,
+                recommendations=recommendations,
+                message=None,
+            )
+
+        except ValueError as error:
+            return self._analysis_error_response(
+                request=request,
+                message=str(error),
+            )
+
+        except Exception:
+            return self._internal_error_response(request)
+
+    def _no_data_response(self, request: AnalysisRequest) -> AnalysisResponse:
         return AnalysisResponse(
             request_id=request.request_id,
             user_id=request.user_id,
             period=request.period,
-            status=AnalysisStatus.SUCCESS,
-            summary=SummaryDto(
-                total_income=analytics.total_income,
-                total_expense=analytics.total_expense,
-                balance=analytics.balance,
-                period=request.period,
-            ),
-            financial_state=financial_state,
-            category_analytics=analytics.category_analytics,
-            top_categories=analytics.top_categories,
-            insights=insights,
-            recommendations=recommendations,
+            status=AnalysisStatus.NO_DATA,
+            summary=None,
+            financial_state=FinancialState.NO_DATA,
+            category_analytics=[],
+            top_categories=[],
+            insights=[],
+            recommendations=[],
+            message="Нет данных для анализа.",
         )
 
+    def _analysis_error_response(
+            self,
+            request: AnalysisRequest,
+            message: str,
+    ) -> AnalysisResponse:
+        return AnalysisResponse(
+            request_id=request.request_id,
+            user_id=request.user_id,
+            period=request.period,
+            status=AnalysisStatus.ANALYSIS_ERROR,
+            summary=None,
+            financial_state=None,
+            category_analytics=[],
+            top_categories=[],
+            insights=[],
+            recommendations=[],
+            message=message,
+        )
+
+    def _internal_error_response(self, request: AnalysisRequest) -> AnalysisResponse:
+        return AnalysisResponse(
+            request_id=request.request_id,
+            user_id=request.user_id,
+            period=request.period,
+            status=AnalysisStatus.INTERNAL_ERROR,
+            summary=None,
+            financial_state=None,
+            category_analytics=[],
+            top_categories=[],
+            insights=[],
+            recommendations=[],
+            message="Внутренняя ошибка AI-сервиса.",
+        )
 
 def get_analysis_service() -> AnalysisService:
-    analytics_provider = AnalyticsProvider()
-    state_predictor = StatePredictor()
-    insight_generator = InsightGenerator()
-    recommendation_generator = RecommendationGenerator()
-    pattern_detector = PatternDetector()
-
     return AnalysisService(
-        analytics_provider=analytics_provider,
-        state_predictor=state_predictor,
-        insight_generator=insight_generator,
-        recommendation_generator=recommendation_generator,
-        pattern_detector=pattern_detector,
+        analytics_provider=AnalyticsProvider(),
+        state_predictor=StatePredictor(),
+        insight_generator=InsightGenerator(),
+        recommendation_generator=RecommendationGenerator(),
+        pattern_detector=PatternDetector(),
     )

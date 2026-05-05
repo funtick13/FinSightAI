@@ -43,3 +43,4 @@ class AnalysisResponse(BaseModel):
         default_factory=list,
         max_length=5,
     )
+    message: str | None = None

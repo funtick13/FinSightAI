@@ -5,7 +5,9 @@ from app.core.recommendation_generator import RecommendationGenerator
 from app.core.state_predictor import StatePredictor
 from app.schemas.analysis import AnalysisRequest, AnalysisResponse, SummaryDto
 from app.schemas.analysis.enums import AnalysisStatus, FinancialState
+import logging
 
+logger = logging.getLogger(__name__)
 
 class AnalysisService:
     def __init__(
@@ -23,6 +25,14 @@ class AnalysisService:
         self.pattern_detector = pattern_detector
 
     def analyze(self, request: AnalysisRequest) -> AnalysisResponse:
+        logger.info(
+            "Start analysis: requestId=%s userId=%s period=%s transactions=%s",
+            request.request_id,
+            request.user_id,
+            request.period,
+            len(request.transactions),
+        )
+
         if not request.transactions:
             return self._no_data_response(request)
 
@@ -51,6 +61,16 @@ class AnalysisService:
                 patterns=patterns,
             )
 
+            logger.info(
+                "Analysis completed: requestId=%s status=%s financialState=%s patterns=%s insights=%s recommendations=%s",
+                request.request_id,
+                AnalysisStatus.SUCCESS,
+                financial_state,
+                len(patterns),
+                len(insights),
+                len(recommendations),
+            )
+
             return AnalysisResponse(
                 request_id=request.request_id,
                 user_id=request.user_id,
@@ -77,7 +97,14 @@ class AnalysisService:
             )
 
         except Exception:
+            logger.exception(
+                "Analysis failed: requestId=%s userId=%s",
+                request.request_id,
+                request.user_id,
+            )
             return self._internal_error_response(request)
+
+
 
     def _no_data_response(self, request: AnalysisRequest) -> AnalysisResponse:
         return AnalysisResponse(

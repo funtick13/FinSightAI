@@ -54,6 +54,9 @@ public class Statement {
     @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
 
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
 

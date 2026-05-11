@@ -35,19 +35,8 @@ public class StatementService {
             String period,
             MultipartFile file
     ) {
-        if (user == null) {
-            throw new InvalidStatementException("Пользователь не найден");
-        }
 
-        if (bank == null) {
-            throw new InvalidStatementException("Банк не указан");
-        }
-
-        if (file == null || file.isEmpty()) {
-            throw new InvalidStatementException("Файл выписки не передан");
-        }
-
-        validatePeriod(period);
+        validateUpload(bank, period, file);
 
         if (!"application/pdf".equals(file.getContentType())) {
             throw new UnsupportedFileTypeException();
@@ -74,6 +63,7 @@ public class StatementService {
                 .fileSize(storedFile.getFileSize())
                 .status(StatementStatus.UPLOADED)
                 .uploadedAt(now)
+                .updatedAt(now)
                 .processedAt(now)
                 .build();
 
@@ -101,7 +91,11 @@ public class StatementService {
         statementRepository.delete(statement);
     }
 
-    private void validatePeriod(String period) {
+    private void validateUpload(BankType bank, String period, MultipartFile file) {
+        if (bank == null) {
+            throw new InvalidStatementException("Банк не указан");
+        }
+
         if (period == null || period.isBlank()) {
             throw new InvalidStatementException("Расчётный период не указан");
         }
@@ -110,10 +104,18 @@ public class StatementService {
             throw new InvalidStatementException("Период должен быть в формате YYYY-MM");
         }
 
-        try {
-            YearMonth.parse(period);
-        } catch (DateTimeParseException exception) {
-            throw new InvalidStatementException("Период должен быть корректным месяцем в формате YYYY-MM");
+        if (file == null || file.isEmpty()) {
+            throw new InvalidStatementException("Файл выписки не передан");
+        }
+
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+            throw new UnsupportedFileTypeException("Можно загружать только PDF-файлы");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".pdf")) {
+            throw new UnsupportedFileTypeException("Файл должен иметь расширение .pdf");
         }
     }
 }

@@ -6,6 +6,8 @@ import com.finsightai.web.exception.EmailAlreadyExistsException;
 import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.UserRepository;
+import com.finsightai.web.service.auth.AuthService;
+import com.finsightai.web.service.auth.EmailConfirmationTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/FinSightAI.iml" filepath="$PROJECT_DIR$/.idea/FinSightAI.iml" />
       <module fileurl="file://$PROJECT_DIR$/ai-service/ai-service.iml" filepath="$PROJECT_DIR$/ai-service/ai-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/backend.iml" filepath="$PROJECT_DIR$/backend/backend.iml" />
     </modules>
   </component>
 </project>

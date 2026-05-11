@@ -1,4 +1,4 @@
-package com.finsightai.web.service;
+package com.finsightai.web.service.auth;
 
 import com.finsightai.web.dto.*;
 import com.finsightai.web.exception.EmailAlreadyExistsException;
@@ -13,6 +13,8 @@ import com.finsightai.web.model.PasswordResetToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.PasswordResetTokenRepository;
 import com.finsightai.web.repository.UserRepository;
+import com.finsightai.web.service.JwtService;
+import com.finsightai.web.service.PasswordResetTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

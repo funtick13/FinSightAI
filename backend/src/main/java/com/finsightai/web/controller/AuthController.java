@@ -1,8 +1,8 @@
 package com.finsightai.web.controller;
 
 import com.finsightai.web.dto.*;
-import com.finsightai.web.service.AuthService;
-import com.finsightai.web.service.EmailConfirmationTokenService;
+import com.finsightai.web.service.auth.AuthService;
+import com.finsightai.web.service.auth.EmailConfirmationTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

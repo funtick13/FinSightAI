@@ -1,4 +1,4 @@
-package com.finsightai.web.service;
+package com.finsightai.web.service.auth;
 
 import com.finsightai.web.dto.MessageResponse;
 import com.finsightai.web.exception.TokenExpiredException;
@@ -7,6 +7,7 @@ import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.EmailConfirmationTokenRepository;
 import com.finsightai.web.repository.UserRepository;
+import com.finsightai.web.service.TokenService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

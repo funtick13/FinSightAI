@@ -29,16 +29,13 @@ services:
       - "8080:8080"
 
   ai-service:
-    build:
-      context: ../ai-service
-      dockerfile: ../AI/Dockerfile
-    container_name: finsight_ai_service
-    depends_on:
-      - db
-    environment:
-      PYTHONUNBUFFERED: 1
+    build: .
+    container_name: finsight-ai-service
     ports:
       - "8000:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
 
 volumes:
   db_data:

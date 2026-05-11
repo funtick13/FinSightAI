@@ -1,6 +1,8 @@
 package com.finsightai.web.service.statement;
 
 import com.finsightai.web.dto.statement.StoredFile;
+import com.finsightai.web.exception.FileStorageException;
+import com.finsightai.web.exception.InvalidStatementException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +18,7 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public StoredFile save(MultipartFile file, UUID userId, UUID statementId) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Файл выписки не передан или пустой");
+            throw new InvalidStatementException("Файл выписки не передан или пустой");
         }
 
         String originalFileName = file.getOriginalFilename();
@@ -43,7 +45,7 @@ public class LocalFileStorageService implements FileStorageService {
             );
 
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось сохранить файл выписки", e);
+            throw new FileStorageException("Не удалось сохранить файл выписки", e);
         }
 
     }
@@ -57,7 +59,7 @@ public class LocalFileStorageService implements FileStorageService {
         try {
             Files.deleteIfExists(Paths.get(filePath));
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось удалить файл выписки", e);
+            throw new FileStorageException("Не удалось удалить файл выписки", e);
         }
     }
 }

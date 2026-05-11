@@ -1,5 +1,10 @@
+com\finsightai\web\exception\StatementNotFoundException.class
+com\finsightai\web\dto\ErrorResponse.class
+com\finsightai\web\dto\ErrorResponse$ErrorResponseBuilder.class
+com\finsightai\web\exception\FileStorageException.class
+com\finsightai\web\exception\InvalidStatementException.class
+com\finsightai\web\exception\GlobalExceptionHandler.class
 com\finsightai\web\service\JpaUserDetailsService.class
 com\finsightai\web\service\JwtService.class
-com\finsightai\web\service\EmailConfirmationTokenService.class
-com\finsightai\web\service\AuthService.class
+com\finsightai\web\exception\UnsupportedFileTypeException.class
 com\finsightai\web\configuration\JwtAuthenticationFilter.class

@@ -22,7 +22,6 @@ public class StatementResponse {
     private Long fileSize;
     private StatementStatus status;
     private LocalDateTime uploadedAt;
-    private LocalDateTime updatedAt;
     private LocalDateTime processedAt;
     private String errorMessage;
 }

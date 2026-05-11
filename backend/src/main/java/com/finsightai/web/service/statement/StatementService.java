@@ -2,6 +2,9 @@ package com.finsightai.web.service.statement;
 
 import com.finsightai.web.dto.statement.StatementResponse;
 import com.finsightai.web.dto.statement.StoredFile;
+import com.finsightai.web.exception.InvalidStatementException;
+import com.finsightai.web.exception.StatementNotFoundException;
+import com.finsightai.web.exception.UnsupportedFileTypeException;
 import com.finsightai.web.mapper.StatementMapper;
 import com.finsightai.web.model.Statement;
 import com.finsightai.web.model.User;
@@ -14,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -31,27 +36,21 @@ public class StatementService {
             MultipartFile file
     ) {
         if (user == null) {
-            throw new IllegalArgumentException("Пользователь не найден");
+            throw new InvalidStatementException("Пользователь не найден");
         }
 
         if (bank == null) {
-            throw new IllegalArgumentException("Банк не указан");
-        }
-
-        if (period == null || period.isBlank()) {
-            throw new IllegalArgumentException("Расчётный период не указан");
+            throw new InvalidStatementException("Банк не указан");
         }
 
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Файл выписки не передан");
+            throw new InvalidStatementException("Файл выписки не передан");
         }
 
-        if (!period.matches("\\d{4}-\\d{2}")) {
-            throw new IllegalArgumentException("Период должен быть в формате YYYY-MM");
-        }
+        validatePeriod(period);
 
         if (!"application/pdf".equals(file.getContentType())) {
-            throw new IllegalArgumentException("Можно загружать только PDF-файлы");
+            throw new UnsupportedFileTypeException();
         }
 
         UUID statementId = UUID.randomUUID();
@@ -75,7 +74,6 @@ public class StatementService {
                 .fileSize(storedFile.getFileSize())
                 .status(StatementStatus.UPLOADED)
                 .uploadedAt(now)
-                .updatedAt(now)
                 .processedAt(now)
                 .build();
 
@@ -91,15 +89,31 @@ public class StatementService {
 
     public StatementResponse getStatement(UUID userId, UUID statementId) {
         Statement statement = statementRepository.findByIdAndUserId(statementId, userId)
-                .orElseThrow(() -> new RuntimeException("Выписка не найдена"));
+                .orElseThrow(StatementNotFoundException::new);
         return statementMapper.toResponse(statement);
     }
 
     public void deleteStatement(UUID userId, UUID statementId) {
         Statement statement = statementRepository.findByIdAndUserId(statementId, userId)
-                .orElseThrow(() -> new RuntimeException("Выписка не найдена"));
+                .orElseThrow(StatementNotFoundException::new);
 
         fileStorageService.delete(statement.getFilePath());
         statementRepository.delete(statement);
+    }
+
+    private void validatePeriod(String period) {
+        if (period == null || period.isBlank()) {
+            throw new InvalidStatementException("Расчётный период не указан");
+        }
+
+        if (!period.matches("\\d{4}-\\d{2}")) {
+            throw new InvalidStatementException("Период должен быть в формате YYYY-MM");
+        }
+
+        try {
+            YearMonth.parse(period);
+        } catch (DateTimeParseException exception) {
+            throw new InvalidStatementException("Период должен быть корректным месяцем в формате YYYY-MM");
+        }
     }
 }

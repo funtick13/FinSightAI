@@ -13,6 +13,7 @@ import com.finsightai.web.service.statement.normalizer.TransactionNormalizer;
 import com.finsightai.web.service.statement.parser.BankStatementParser;
 import com.finsightai.web.service.statement.parser.PdfTextExtractor;
 import com.finsightai.web.service.statement.parser.SberbankStatementParser;
+import com.finsightai.web.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,61 +35,84 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
     private final SberbankStatementParser sberbankStatementParser;
     private final TransactionNormalizer transactionNormalizer;
     private final DuplicateTransactionDetector duplicateTransactionDetector;
+    private final TransactionService transactionService;
 
     @Override
     @Transactional
     public void processStatement(UUID statementId) {
-        processStatementToCandidates(statementId);
-    }
-
-    @Override
-    @Transactional
-    public List<TransactionCandidate> processStatementToCandidates(UUID statementId) {
         Statement statement = statementRepository.findById(statementId)
                 .orElseThrow(StatementNotFoundException::new);
 
         markProcessing(statement);
 
         try {
-            String rawText = pdfTextExtractor.extract(Path.of(statement.getFilePath()));
-            if (log.isDebugEnabled()) {
-                log.debug("Выделенный PDF текст выписки {}:\n{}", statementId, sanitizeForDebug(rawText));
-            }
-
-            BankStatementParser parser = resolveParser(statement.getBank());
-            List<ParsedTransaction> parsedTransactions = parser.parse(rawText);
-            List<TransactionCandidate> candidates = normalizeTransactions(statement, parsedTransactions);
-            List<TransactionCandidate> uniqueCandidates = duplicateTransactionDetector.removeDuplicates(candidates);
+            List<TransactionCandidate> uniqueCandidates = buildCandidates(statement);
 
             if (uniqueCandidates.isEmpty()) {
                 throw new StatementParsingException("В выписке не найдено корректных операций");
             }
 
-            // TODO: save TransactionCandidate objects when Operation persistence is introduced.
-            log.info(
-                    "Выписка {} проведена: parsed={}, normalized={}, unique={}",
-                    statementId,
-                    parsedTransactions.size(),
-                    candidates.size(),
-                    uniqueCandidates.size()
-            );
+            transactionService.saveCandidates(uniqueCandidates);
 
             markProcessed(statement);
-            return uniqueCandidates;
+
+            log.info(
+                    "Выписка {} успешно обработана и операции сохранены: unique={}",
+                    statementId,
+                    uniqueCandidates.size()
+            );
         } catch (RuntimeException exception) {
             logFailure(statementId, exception);
             markFailed(statement, exception);
-            return List.of();
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransactionCandidate> processStatementToCandidates(UUID statementId) {
+        Statement statement = statementRepository.findById(statementId)
+                .orElseThrow(StatementNotFoundException::new);
+
+        return buildCandidates(statement);
+    }
+
+    private List<TransactionCandidate> buildCandidates(Statement statement) {
+        UUID statementId = statement.getId();
+
+        String rawText = pdfTextExtractor.extract(Path.of(statement.getFilePath()));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Выделенный PDF текст выписки {}:\n{}", statementId, sanitizeForDebug(rawText));
+        }
+
+        BankStatementParser parser = resolveParser(statement.getBank());
+
+        List<ParsedTransaction> parsedTransactions = parser.parse(rawText);
+        List<TransactionCandidate> candidates = normalizeTransactions(statement, parsedTransactions);
+        List<TransactionCandidate> uniqueCandidates = duplicateTransactionDetector.removeDuplicates(candidates);
+
+        if (uniqueCandidates.isEmpty()) {
+            throw new StatementParsingException("В выписке не найдено корректных операций");
+        }
+
+        log.info(
+                "Выписка {} разобрана: parsed={}, normalized={}, unique={}",
+                statementId,
+                parsedTransactions.size(),
+                candidates.size(),
+                uniqueCandidates.size()
+        );
+
+        return uniqueCandidates;
     }
 
     private void logFailure(UUID statementId, RuntimeException exception) {
         if (exception instanceof StatementParsingException) {
-            log.warn("Ошибка в проведении выписки: statementId={}, reason={}", statementId, exception.getMessage());
+            log.warn("Ошибка в обработке выписки: statementId={}, reason={}", statementId, exception.getMessage());
             return;
         }
 
-        log.error("Ошибка в проведении выписки: statementId={}", statementId, exception);
+        log.error("Ошибка в обработке выписки: statementId={}", statementId, exception);
     }
 
     private BankStatementParser resolveParser(BankType bank) {

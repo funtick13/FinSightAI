@@ -1,4 +1,4 @@
-package com.finsightai.web.dto;
+package com.finsightai.web.dto.auth;
 
 import lombok.*;
 

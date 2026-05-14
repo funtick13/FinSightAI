@@ -1,7 +1,7 @@
 package com.finsightai.web.service;
 
-import com.finsightai.web.dto.AuthRequest;
-import com.finsightai.web.dto.LoginResponse;
+import com.finsightai.web.dto.auth.AuthRequest;
+import com.finsightai.web.dto.auth.LoginResponse;
 import com.finsightai.web.exception.EmailNotConfirmedException;
 import com.finsightai.web.exception.InvalidCredentialsException;
 import com.finsightai.web.exception.UserNotFoundException;

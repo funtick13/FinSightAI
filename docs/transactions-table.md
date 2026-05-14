@@ -168,22 +168,7 @@ create table transactions (
 );
 ```
 
-### 6.1 Индексы
-
-Для ускорения выборки операций необходимо предусмотреть индексы:
-
-```sql
-create index idx_transactions_user_period
-    on transactions(user_id, period);
-
-create index idx_transactions_statement_id
-    on transactions(statement_id);
-
-create index idx_transactions_user_bank_period
-    on transactions(user_id, bank, period);
-```
-
-### 6.2 Уникальность и дубликаты
+### 6. Уникальность и дубликаты
 
 Дубликат операции в рамках MVP определяется по комбинации:
 
@@ -331,21 +316,6 @@ Mapper не должен выполнять проверку дублей, ра�
 `TransactionResponse` предназначен для возврата операции во внешнем API backend-сервера.
 
 ### 11.2 Структура ответа
-
-```java
-public record TransactionResponse(
-    UUID id,
-    UUID statementId,
-    String bank,
-    String period,
-    LocalDate date,
-    LocalTime time,
-    TransactionType type,
-    BigDecimal amount,
-    String category,
-    String description
-) {}
-```
 
 Пример JSON-ответа:
 

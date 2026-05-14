@@ -13,6 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Order(Ordered.LOWEST_PRECEDENCE)
 @RestControllerAdvice
@@ -86,6 +87,30 @@ public class GlobalExceptionHandler {
                 .orElse("Некорректные данные запроса");
 
         return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionNotFound(
+            TransactionNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidPeriodException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPeriod(
+            InvalidPeriodException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(TransactionSaveException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionSave(
+            TransactionSaveException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)

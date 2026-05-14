@@ -12,6 +12,7 @@ import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.StatementStatus;
 import com.finsightai.web.repository.StatementRepository;
 import com.finsightai.web.service.statement.processing.StatementProcessingService;
+import com.finsightai.web.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class StatementService {
     private final LocalFileStorageService fileStorageService;
     private final StatementMapper statementMapper;
     private final StatementProcessingService statementProcessingService;
+    private final TransactionService transactionService;
 
     public StatementResponse uploadStatement(
             User user,
@@ -93,6 +95,7 @@ public class StatementService {
         Statement statement = statementRepository.findByIdAndUserId(statementId, userId)
                 .orElseThrow(StatementNotFoundException::new);
 
+        transactionService.deleteByStatementId(statementId);
         fileStorageService.delete(statement.getFilePath());
         statementRepository.delete(statement);
     }

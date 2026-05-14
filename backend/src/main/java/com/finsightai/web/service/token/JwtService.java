@@ -1,4 +1,4 @@
-package com.finsightai.web.service;
+package com.finsightai.web.service.token;
 
 import com.finsightai.web.exception.JwtKeyException;
 import com.finsightai.web.model.User;

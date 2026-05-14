@@ -1,6 +1,6 @@
 package com.finsightai.web.configuration;
 
-import com.finsightai.web.service.JwtService;
+import com.finsightai.web.service.token.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

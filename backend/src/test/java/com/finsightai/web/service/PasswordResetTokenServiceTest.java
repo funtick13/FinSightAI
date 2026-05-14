@@ -3,6 +3,7 @@ package com.finsightai.web.service;
 import com.finsightai.web.model.PasswordResetToken;
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.PasswordResetTokenRepository;
+import com.finsightai.web.service.token.PasswordResetTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -1,11 +1,19 @@
 package com.finsightai.web.dto.statement;
 
-public record ParsedTransaction(
-        String rawDate,
-        String rawTime,
-        String rawCategory,
-        String rawDescription,
-        String rawAmount,
-        String rawLine
-) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class ParsedTransaction {
+    private String rawDate;
+    private String rawTime;
+    private String rawCategory;
+    private String rawDescription;
+    private String rawAmount;
+    private String rawLine;
 }

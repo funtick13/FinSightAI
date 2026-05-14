@@ -45,17 +45,17 @@ public class TransactionNormalizer {
             throw new StatementParsingException("Операция выписки не передана для нормализации");
         }
 
-        LocalDate date = parseDate(parsedTransaction.rawDate());
-        LocalTime time = parseTime(parsedTransaction.rawTime());
-        NormalizedAmount normalizedAmount = parseAmount(parsedTransaction.rawAmount());
+        LocalDate date = parseDate(parsedTransaction.getRawDate());
+        LocalTime time = parseTime(parsedTransaction.getRawTime());
+        NormalizedAmount normalizedAmount = parseAmount(parsedTransaction.getRawAmount());
 
         return new TransactionCandidate(
                 date,
                 time,
                 normalizedAmount.amount(),
                 normalizedAmount.type(),
-                valueOrDefault(parsedTransaction.rawCategory(), DEFAULT_CATEGORY),
-                valueOrDefault(parsedTransaction.rawDescription(), DEFAULT_DESCRIPTION),
+                valueOrDefault(parsedTransaction.getRawCategory(), DEFAULT_CATEGORY),
+                valueOrDefault(parsedTransaction.getRawDescription(), DEFAULT_DESCRIPTION),
                 bank,
                 period,
                 userId,
@@ -75,7 +75,6 @@ public class TransactionNormalizer {
             try {
                 return LocalDate.parse(normalized, formatter);
             } catch (DateTimeParseException ignored) {
-                // Try the next supported bank date format.
             }
         }
 

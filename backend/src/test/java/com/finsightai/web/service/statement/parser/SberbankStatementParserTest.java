@@ -28,14 +28,14 @@ class SberbankStatementParserTest {
         List<ParsedTransaction> result = parser.parse(rawText);
 
         assertEquals(2, result.size());
-        assertEquals("16.04.2026", result.get(0).rawDate());
-        assertEquals("19:28", result.get(0).rawTime());
-        assertEquals("Транспорт", result.get(0).rawCategory());
-        assertEquals("TPP_VPT SBERTROJKA Voronezh RUS", result.get(0).rawDescription());
-        assertEquals("37,00", result.get(0).rawAmount());
-        assertEquals("Перевод СБП", result.get(1).rawCategory());
-        assertEquals("Перевод от клиента", result.get(1).rawDescription());
-        assertEquals("+200,00", result.get(1).rawAmount());
+        assertEquals("16.04.2026", result.get(0).getRawDate());
+        assertEquals("19:28", result.get(0).getRawTime());
+        assertEquals("Транспорт", result.get(0).getRawCategory());
+        assertEquals("TPP_VPT SBERTROJKA Voronezh RUS", result.get(0).getRawDescription());
+        assertEquals("37,00", result.get(0).getRawAmount());
+        assertEquals("Перевод СБП", result.get(1).getRawCategory());
+        assertEquals("Перевод от клиента", result.get(1).getRawDescription());
+        assertEquals("+200,00", result.get(1).getRawAmount());
     }
 
     @Test
@@ -50,12 +50,12 @@ class SberbankStatementParserTest {
         List<ParsedTransaction> result = parser.parse(rawText);
 
         assertEquals(2, result.size());
-        assertEquals("Оплата по QR–коду СБП", result.get(0).rawCategory());
-        assertEquals("100,00", result.get(0).rawAmount());
-        assertEquals("817,77", result.get(0).rawLine().substring(result.get(0).rawLine().lastIndexOf(' ') + 1));
-        assertEquals("ТОО \"ОнлиПэй\"", result.get(0).rawDescription());
-        assertEquals("Здоровье и красота", result.get(1).rawCategory());
-        assertEquals("2 500,00", result.get(1).rawAmount());
+        assertEquals("Оплата по QR–коду СБП", result.get(0).getRawCategory());
+        assertEquals("100,00", result.get(0).getRawAmount());
+        assertEquals("817,77", result.get(0).getRawLine().substring(result.get(0).getRawLine().lastIndexOf(' ') + 1));
+        assertEquals("ТОО \"ОнлиПэй\"", result.get(0).getRawDescription());
+        assertEquals("Здоровье и красота", result.get(1).getRawCategory());
+        assertEquals("2 500,00", result.get(1).getRawAmount());
     }
 
     @Test
@@ -65,8 +65,8 @@ class SberbankStatementParserTest {
         List<ParsedTransaction> result = parser.parse(rawText);
 
         assertEquals(1, result.size());
-        assertEquals("Прочее", result.get(0).rawCategory());
-        assertEquals("Такси до дома", result.get(0).rawDescription());
+        assertEquals("Прочее", result.get(0).getRawCategory());
+        assertEquals("Такси до дома", result.get(0).getRawDescription());
     }
 
     @Test

@@ -52,7 +52,7 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
         try {
             String rawText = pdfTextExtractor.extract(Path.of(statement.getFilePath()));
             if (log.isDebugEnabled()) {
-                log.debug("Extracted PDF text for statement {}:\n{}", statementId, sanitizeForDebug(rawText));
+                log.debug("Выделенный PDF текст выписки {}:\n{}", statementId, sanitizeForDebug(rawText));
             }
 
             BankStatementParser parser = resolveParser(statement.getBank());
@@ -66,7 +66,7 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
 
             // TODO: save TransactionCandidate objects when Operation persistence is introduced.
             log.info(
-                    "Statement {} processed: parsed={}, normalized={}, unique={}",
+                    "Выписка {} проведена: parsed={}, normalized={}, unique={}",
                     statementId,
                     parsedTransactions.size(),
                     candidates.size(),
@@ -84,11 +84,11 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
 
     private void logFailure(UUID statementId, RuntimeException exception) {
         if (exception instanceof StatementParsingException) {
-            log.warn("Statement processing failed: statementId={}, reason={}", statementId, exception.getMessage());
+            log.warn("Ошибка в проведении выписки: statementId={}, reason={}", statementId, exception.getMessage());
             return;
         }
 
-        log.error("Statement processing failed: statementId={}", statementId, exception);
+        log.error("Ошибка в проведении выписки: statementId={}", statementId, exception);
     }
 
     private BankStatementParser resolveParser(BankType bank) {
@@ -115,7 +115,7 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
                         statement.getPeriod()
                 ));
             } catch (StatementParsingException exception) {
-                log.warn("Skipping invalid transaction line while processing statement {}", statement.getId(), exception);
+                log.warn("Пропуск невалидных транзакций {}", statement.getId(), exception);
             }
         }
 

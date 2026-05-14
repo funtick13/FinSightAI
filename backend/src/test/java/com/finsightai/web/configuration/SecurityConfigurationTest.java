@@ -2,7 +2,7 @@ package com.finsightai.web.configuration;
 
 import com.finsightai.web.model.User;
 import com.finsightai.web.repository.UserRepository;
-import com.finsightai.web.service.JwtService;
+import com.finsightai.web.service.token.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -40,12 +40,12 @@ public class DuplicateTransactionDetector {
     ) {
         private static TransactionKey from(TransactionCandidate candidate) {
             return new TransactionKey(
-                    candidate.date(),
-                    candidate.time(),
-                    candidate.amount().stripTrailingZeros().toPlainString(),
-                    candidate.description(),
-                    candidate.bank(),
-                    candidate.period()
+                    candidate.getDate(),
+                    candidate.getTime(),
+                    candidate.getAmount().stripTrailingZeros().toPlainString(),
+                    candidate.getDescription(),
+                    candidate.getBank(),
+                    candidate.getPeriod()
             );
         }
     }

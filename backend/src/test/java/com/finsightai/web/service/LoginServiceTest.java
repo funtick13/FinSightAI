@@ -10,6 +10,8 @@ import com.finsightai.web.repository.PasswordResetTokenRepository;
 import com.finsightai.web.repository.UserRepository;
 import com.finsightai.web.service.auth.AuthService;
 import com.finsightai.web.service.auth.EmailConfirmationTokenService;
+import com.finsightai.web.service.token.JwtService;
+import com.finsightai.web.service.token.PasswordResetTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

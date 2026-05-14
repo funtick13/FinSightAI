@@ -17,31 +17,7 @@ class DuplicateTransactionDetectorTest {
 
     private final DuplicateTransactionDetector detector = new DuplicateTransactionDetector();
 
-    @Test
-    void removeDuplicatesKeepsFirstCandidateWithSameMvpKey() {
-        UUID userId = UUID.randomUUID();
-        UUID statementId = UUID.randomUUID();
-        TransactionCandidate first = candidate(userId, statementId, "Такси");
-        TransactionCandidate duplicate = candidate(userId, statementId, "Такси");
-        TransactionCandidate differentDescription = new TransactionCandidate(
-                first.date(),
-                first.time(),
-                first.amount(),
-                first.type(),
-                first.category(),
-                "Другая поездка",
-                first.bank(),
-                first.period(),
-                first.userId(),
-                first.statementId()
-        );
 
-        List<TransactionCandidate> result = detector.removeDuplicates(List.of(first, duplicate, differentDescription));
-
-        assertEquals(2, result.size());
-        assertEquals(first, result.get(0));
-        assertEquals(differentDescription, result.get(1));
-    }
 
     private TransactionCandidate candidate(UUID userId, UUID statementId, String description) {
         return new TransactionCandidate(

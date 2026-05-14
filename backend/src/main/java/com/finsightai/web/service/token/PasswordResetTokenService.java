@@ -1,4 +1,4 @@
-package com.finsightai.web.service;
+package com.finsightai.web.service.token;
 
 import com.finsightai.web.model.PasswordResetToken;
 import com.finsightai.web.repository.PasswordResetTokenRepository;

@@ -40,14 +40,14 @@ class TransactionNormalizerTest {
                 "2026-04"
         );
 
-        assertEquals(LocalDate.of(2026, 4, 1), result.date());
-        assertEquals(LocalTime.MIDNIGHT, result.time());
-        assertEquals(new BigDecimal("-1234.56"), result.amount());
-        assertEquals(TransactionType.EXPENSE, result.type());
-        assertEquals("Прочее", result.category());
-        assertEquals("Покупка продуктов", result.description());
-        assertEquals(userId, result.userId());
-        assertEquals(statementId, result.statementId());
+        assertEquals(LocalDate.of(2026, 4, 1), result.getDate());
+        assertEquals(LocalTime.MIDNIGHT, result.getTime());
+        assertEquals(new BigDecimal("-1234.56"), result.getAmount());
+        assertEquals(TransactionType.EXPENSE, result.getType());
+        assertEquals("Прочее", result.getCategory());
+        assertEquals("Покупка продуктов", result.getDescription());
+        assertEquals(userId, result.getUserId());
+        assertEquals(statementId, result.getStatementId());
     }
 
     @Test
@@ -69,9 +69,9 @@ class TransactionNormalizerTest {
                 "2026-04"
         );
 
-        assertEquals(LocalTime.of(9, 15), result.time());
-        assertEquals(new BigDecimal("5000.00"), result.amount());
-        assertEquals(TransactionType.INCOME, result.type());
+        assertEquals(LocalTime.of(9, 15), result.getTime());
+        assertEquals(new BigDecimal("5000.00"), result.getAmount());
+        assertEquals(TransactionType.INCOME, result.getType());
     }
 
     @Test

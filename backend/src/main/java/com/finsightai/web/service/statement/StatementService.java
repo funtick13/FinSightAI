@@ -11,6 +11,7 @@ import com.finsightai.web.model.User;
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.StatementStatus;
 import com.finsightai.web.repository.StatementRepository;
+import com.finsightai.web.service.statement.processing.StatementProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ public class StatementService {
     private final StatementRepository statementRepository;
     private final LocalFileStorageService fileStorageService;
     private final StatementMapper statementMapper;
+    private final StatementProcessingService statementProcessingService;
 
     public StatementResponse uploadStatement(
             User user,
@@ -64,12 +66,16 @@ public class StatementService {
                 .status(StatementStatus.UPLOADED)
                 .uploadedAt(now)
                 .updatedAt(now)
-                .processedAt(now)
+                .processedAt(null)
                 .build();
 
         Statement savedStatement = statementRepository.save(statement);
+        statementProcessingService.processStatement(savedStatement.getId());
 
-        return statementMapper.toResponse(savedStatement);
+        Statement processedStatement = statementRepository.findById(savedStatement.getId())
+                .orElse(savedStatement);
+
+        return statementMapper.toResponse(processedStatement);
     }
 
     public Page<StatementResponse> getUserStatements(UUID userId, Pageable pageable) {

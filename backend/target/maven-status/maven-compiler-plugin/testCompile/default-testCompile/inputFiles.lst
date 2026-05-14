@@ -3,3 +3,8 @@ D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\EmailC
 D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\LoginServiceTest.java
 D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\PasswordResetTokenServiceTest.java
 D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\RegisterServiceTest.java
+D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\statement\duplicate\DuplicateTransactionDetectorTest.java
+D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\statement\normalizer\TransactionNormalizerTest.java
+D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\statement\parser\PdfTextExtractorTest.java
+D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\statement\parser\SberbankStatementParserTest.java
+D:\Programing\FinSightAI\backend\src\test\java\com\finsightai\web\service\statement\processing\StatementProcessingServiceImplTest.java

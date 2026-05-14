@@ -11,8 +11,10 @@ D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\LoginReque
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\LoginResponse.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\MessageResponse.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\ResetPasswordRequest.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\statement\ParsedTransaction.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\statement\StatementResponse.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\statement\StoredFile.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\dto\statement\TransactionCandidate.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\AuthException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\AuthExceptionHandler.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\EmailAlreadyExistsException.java
@@ -23,6 +25,7 @@ D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\Inva
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\InvalidStatementException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\JwtKeyException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\StatementNotFoundException.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\StatementParsingException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\TokenAlreadyUsedException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\TokenExpiredException.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\exception\TokenNotFoundException.java
@@ -32,6 +35,7 @@ D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\mapper\Stateme
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\EmailConfirmationToken.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\enums\BankType.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\enums\StatementStatus.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\enums\TransactionType.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\PasswordResetToken.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\Statement.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\model\User.java
@@ -45,7 +49,14 @@ D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\auth\E
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\JpaUserDetailsService.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\JwtService.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\PasswordResetTokenService.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\duplicate\DuplicateTransactionDetector.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\FileStorageService.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\LocalFileStorageService.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\normalizer\TransactionNormalizer.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\parser\BankStatementParser.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\parser\PdfTextExtractor.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\parser\SberbankStatementParser.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\processing\StatementProcessingService.java
+D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\processing\StatementProcessingServiceImpl.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\statement\StatementService.java
 D:\Programing\FinSightAI\backend\src\main\java\com\finsightai\web\service\TokenService.java

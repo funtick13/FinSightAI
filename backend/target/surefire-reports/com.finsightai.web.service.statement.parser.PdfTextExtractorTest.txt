@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.finsightai.web.service.statement.parser.PdfTextExtractorTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in com.finsightai.web.service.statement.parser.PdfTextExtractorTest

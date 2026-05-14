@@ -1,5 +1,10 @@
-com\finsightai\web\service\PasswordResetTokenServiceTest.class
+com\finsightai\web\service\statement\normalizer\TransactionNormalizerTest.class
 com\finsightai\web\service\EmailConfirmationTokenServiceTest.class
+com\finsightai\web\service\statement\parser\SberbankStatementParserTest.class
 com\finsightai\web\configuration\SecurityConfigurationTest.class
+com\finsightai\web\service\PasswordResetTokenServiceTest.class
+com\finsightai\web\service\statement\parser\PdfTextExtractorTest.class
 com\finsightai\web\service\LoginServiceTest.class
+com\finsightai\web\service\statement\duplicate\DuplicateTransactionDetectorTest.class
+com\finsightai\web\service\statement\processing\StatementProcessingServiceImplTest.class
 com\finsightai\web\service\RegisterServiceTest.class

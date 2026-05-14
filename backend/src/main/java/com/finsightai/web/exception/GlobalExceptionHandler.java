@@ -50,6 +50,14 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request);
     }
 
+    @ExceptionHandler(StatementParsingException.class)
+    public ResponseEntity<ErrorResponse> handleStatementParsing(
+            StatementParsingException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException exception,

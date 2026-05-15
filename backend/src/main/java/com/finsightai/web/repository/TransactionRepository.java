@@ -11,10 +11,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     List<Transaction> findAllByUserIdAndPeriodOrderByDateDescTimeDesc(
             UUID userId,
             String period
+    );
+
+    List<Transaction> findAllByUserIdAndPeriodAndBankOrderByDateAscTimeAsc(
+            UUID userId,
+            String period,
+            BankType bank
     );
 
     Optional<Transaction> findByIdAndUserId(

@@ -13,6 +13,7 @@ import com.finsightai.web.service.statement.normalizer.TransactionNormalizer;
 import com.finsightai.web.service.statement.parser.BankStatementParser;
 import com.finsightai.web.service.statement.parser.PdfTextExtractor;
 import com.finsightai.web.service.statement.parser.SberbankStatementParser;
+import com.finsightai.web.service.ai.FinancialAnalysisService;
 import com.finsightai.web.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
     private final TransactionNormalizer transactionNormalizer;
     private final DuplicateTransactionDetector duplicateTransactionDetector;
     private final TransactionService transactionService;
+    private final FinancialAnalysisService financialAnalysisService;
 
     @Override
     @Transactional
@@ -53,6 +55,7 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
             }
 
             transactionService.saveCandidates(uniqueCandidates);
+            analyzeStatementPeriod(statement);
 
             markProcessed(statement);
 
@@ -64,6 +67,22 @@ public class StatementProcessingServiceImpl implements StatementProcessingServic
         } catch (RuntimeException exception) {
             logFailure(statementId, exception);
             markFailed(statement, exception);
+        }
+    }
+
+    private void analyzeStatementPeriod(Statement statement) {
+        try {
+            financialAnalysisService.analyzePeriod(
+                    statement.getUser().getId(),
+                    statement.getPeriod(),
+                    statement.getBank()
+            );
+        } catch (RuntimeException exception) {
+            log.warn(
+                    "AI-анализ не выполнен: statementId={}, reason={}",
+                    statement.getId(),
+                    exception.getMessage()
+            );
         }
     }
 

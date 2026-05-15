@@ -9,10 +9,12 @@ import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.StatementStatus;
 import com.finsightai.web.model.enums.TransactionType;
 import com.finsightai.web.repository.StatementRepository;
+import com.finsightai.web.service.ai.FinancialAnalysisService;
 import com.finsightai.web.service.statement.duplicate.DuplicateTransactionDetector;
 import com.finsightai.web.service.statement.normalizer.TransactionNormalizer;
 import com.finsightai.web.service.statement.parser.PdfTextExtractor;
 import com.finsightai.web.service.statement.parser.SberbankStatementParser;
+import com.finsightai.web.service.transaction.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,15 +58,58 @@ class StatementProcessingServiceImplTest {
     @Mock
     private DuplicateTransactionDetector duplicateTransactionDetector;
 
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private FinancialAnalysisService financialAnalysisService;
+
     @InjectMocks
     private StatementProcessingServiceImpl processingService;
 
     @Test
-    void processStatementMarksStatementProcessedOnSuccess() {
+    void processStatementMarksStatementProcessedAndCallsAiAnalysisOnSuccess() {
         Statement statement = statement();
         ParsedTransaction parsedTransaction = parsedTransaction();
         TransactionCandidate candidate = candidate(statement);
+        mockSuccessfulCandidateBuild(statement, parsedTransaction, candidate);
 
+        processingService.processStatement(statement.getId());
+
+        assertEquals(StatementStatus.PROCESSED, statement.getStatus());
+        assertNotNull(statement.getProcessedAt());
+        assertNull(statement.getErrorMessage());
+        verify(transactionService).saveCandidates(List.of(candidate));
+        verify(financialAnalysisService).analyzePeriod(
+                statement.getUser().getId(),
+                statement.getPeriod(),
+                statement.getBank()
+        );
+        verify(statementRepository, atLeastOnce()).save(statement);
+    }
+
+    @Test
+    void processStatementStillMarksProcessedWhenAiAnalysisFails() {
+        Statement statement = statement();
+        ParsedTransaction parsedTransaction = parsedTransaction();
+        TransactionCandidate candidate = candidate(statement);
+        mockSuccessfulCandidateBuild(statement, parsedTransaction, candidate);
+        doThrow(new RuntimeException("AI-service недоступен")).when(financialAnalysisService)
+                .analyzePeriod(statement.getUser().getId(), statement.getPeriod(), statement.getBank());
+
+        processingService.processStatement(statement.getId());
+
+        assertEquals(StatementStatus.PROCESSED, statement.getStatus());
+        assertNotNull(statement.getProcessedAt());
+        assertNull(statement.getErrorMessage());
+        verify(transactionService).saveCandidates(List.of(candidate));
+    }
+
+    @Test
+    void processStatementToCandidatesReturnsPreparedCandidatesWithoutSavingTransactions() {
+        Statement statement = statement();
+        ParsedTransaction parsedTransaction = parsedTransaction();
+        TransactionCandidate candidate = candidate(statement);
         when(statementRepository.findById(statement.getId())).thenReturn(Optional.of(statement));
         when(pdfTextExtractor.extract(Path.of(statement.getFilePath()))).thenReturn("raw text");
         when(sberbankStatementParser.parse("raw text")).thenReturn(List.of(parsedTransaction));
@@ -79,10 +125,8 @@ class StatementProcessingServiceImplTest {
         List<TransactionCandidate> result = processingService.processStatementToCandidates(statement.getId());
 
         assertEquals(List.of(candidate), result);
-        assertEquals(StatementStatus.PROCESSED, statement.getStatus());
-        assertNotNull(statement.getProcessedAt());
-        assertNull(statement.getErrorMessage());
-        verify(statementRepository, atLeastOnce()).save(statement);
+        verify(transactionService, never()).saveCandidates(any());
+        verify(financialAnalysisService, never()).analyzePeriod(any(), any(), any());
     }
 
     @Test
@@ -99,6 +143,7 @@ class StatementProcessingServiceImplTest {
         assertEquals("Файл выписки не найден", statement.getErrorMessage());
         assertNotNull(statement.getProcessedAt());
         verify(sberbankStatementParser, never()).parse(any());
+        verify(financialAnalysisService, never()).analyzePeriod(any(), any(), any());
     }
 
     @Test
@@ -116,6 +161,26 @@ class StatementProcessingServiceImplTest {
         assertEquals("Операции в выписке не найдены", statement.getErrorMessage());
         assertNotNull(statement.getProcessedAt());
         verify(transactionNormalizer, never()).normalize(any(), any(), any(), any(), any());
+        verify(financialAnalysisService, never()).analyzePeriod(any(), any(), any());
+    }
+
+    private void mockSuccessfulCandidateBuild(
+            Statement statement,
+            ParsedTransaction parsedTransaction,
+            TransactionCandidate candidate
+    ) {
+        when(statementRepository.findById(statement.getId())).thenReturn(Optional.of(statement));
+        when(pdfTextExtractor.extract(Path.of(statement.getFilePath()))).thenReturn("raw text");
+        when(sberbankStatementParser.parse("raw text")).thenReturn(List.of(parsedTransaction));
+        when(transactionNormalizer.normalize(
+                parsedTransaction,
+                statement.getUser().getId(),
+                statement.getId(),
+                statement.getBank(),
+                statement.getPeriod()
+        )).thenReturn(candidate);
+        when(duplicateTransactionDetector.removeDuplicates(List.of(candidate))).thenReturn(List.of(candidate));
+        when(transactionService.saveCandidates(List.of(candidate))).thenReturn(List.of());
     }
 
     private Statement statement() {

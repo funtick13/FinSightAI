@@ -4,7 +4,6 @@ from app.core.models.analytics_result import AnalyticsResult
 from app.core.models.category_aggregate import CategoryAggregate
 from app.schemas.analysis import AnalysisRequest, CategoryAnalyticsDto
 
-
 class AnalyticsProvider:
     def calculate(self, request: AnalysisRequest) -> AnalyticsResult:
         total_income = request.statement_summary.total_income

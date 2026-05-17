@@ -911,3 +911,11 @@ Caused by: java.io.IOException: Запрошенную операцию нель
 	at java.base/sun.nio.ch.FileChannelImpl.truncate(FileChannelImpl.java:587)
 	at org.h2.mvstore.SingleFileStore.truncate(SingleFileStore.java:200)
 	... 39 more
+2026-05-15 14:58:42.778361+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Синтаксическая ошибка в выражении SQL "create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type varchar(100) not null, [*]value numeric(19,2), analysis_id uuid not null, primary key (id))"; ожидалось "identifier"
+Syntax error in SQL statement "create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type varchar(100) not null, [*]value numeric(19,2), analysis_id uuid not null, primary key (id))"; expected "identifier"; SQL statement:
+create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type varchar(100) not null, value numeric(19,2), analysis_id uuid not null, primary key (id)) [42001-232]
+2026-05-17 15:54:31.339841+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Синтаксическая ошибка в выражении SQL "create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type enum ('BUDGET_CONTROL','EXPENSE_OPTIMIZATION','GENERAL_ADVICE','SAVING','WARNING') not null, [*]value numeric(19,2), analysis_id uuid not null, primary key (id))"; ожидалось "identifier"
+Syntax error in SQL statement "create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type enum ('BUDGET_CONTROL','EXPENSE_OPTIMIZATION','GENERAL_ADVICE','SAVING','WARNING') not null, [*]value numeric(19,2), analysis_id uuid not null, primary key (id))"; expected "identifier"; SQL statement:
+create table recommendations (id uuid not null, category varchar(255), created_at timestamp(6) not null, percent numeric(5,2), text text not null, type enum ('BUDGET_CONTROL','EXPENSE_OPTIMIZATION','GENERAL_ADVICE','SAVING','WARNING') not null, value numeric(19,2), analysis_id uuid not null, primary key (id)) [42001-232]

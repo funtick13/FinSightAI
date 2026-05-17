@@ -1,5 +1,6 @@
 package com.finsightai.web.model.analysis;
 
+import com.finsightai.web.model.analysis.enums.InsightType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "insights")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +24,10 @@ public class Insight {
     @JoinColumn(name = "analysis_id", nullable = false)
     private FinancialAnalysis analysis;
 
-    @Column(length = 100)
-    private String type;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 100)
+    private InsightType type = InsightType.GENERAL;
 
     @Column(nullable = false, columnDefinition = "text")
     private String text;
@@ -35,6 +39,10 @@ public class Insight {
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+
+        if (type == null) {
+            type = InsightType.GENERAL;
         }
     }
 }

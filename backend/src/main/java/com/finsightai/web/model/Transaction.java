@@ -3,10 +3,7 @@ package com.finsightai.web.model;
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,22 +12,36 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transactions")
+@Table(
+        name = "transactions",
+        indexes = {
+                @Index(name = "idx_transactions_user_period", columnList = "user_id, period"),
+                @Index(name = "idx_transactions_statement", columnList = "statement_id"),
+                @Index(name = "idx_transactions_type", columnList = "type"),
+                @Index(name = "idx_transactions_category", columnList = "category")
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 public class Transaction {
+
     @Id
     @GeneratedValue
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "statement_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Statement statement;
 
     @Enumerated(EnumType.STRING)

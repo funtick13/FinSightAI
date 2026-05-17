@@ -1,5 +1,6 @@
 package com.finsightai.web.model.analysis;
 
+import com.finsightai.web.model.analysis.enums.RecommendationType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,10 @@ public class Recommendation {
     @JoinColumn(name = "analysis_id", nullable = false)
     private FinancialAnalysis analysis;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
-    private String type;
+    private RecommendationType type = RecommendationType.GENERAL_ADVICE;
 
     @Column(length = 255)
     private String category;
@@ -46,6 +49,10 @@ public class Recommendation {
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+
+        if (type == null) {
+            type = RecommendationType.GENERAL_ADVICE;
         }
     }
 }

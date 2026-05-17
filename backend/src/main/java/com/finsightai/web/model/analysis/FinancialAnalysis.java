@@ -5,10 +5,7 @@ import com.finsightai.web.model.analysis.enums.AnalysisStatus;
 import com.finsightai.web.model.analysis.enums.FinancialState;
 import com.finsightai.web.model.enums.BankType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,9 +17,11 @@ import java.util.UUID;
 @Table(name = "financial_analyses")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 public class FinancialAnalysis {
+
     @Id
     @GeneratedValue
     private UUID id;
@@ -49,17 +48,17 @@ public class FinancialAnalysis {
     @Column(name = "financial_state", length = 50)
     private FinancialState financialState;
 
-    @Column(name = "total_income", precision = 19, scale = 2)
-    private BigDecimal totalIncome;
+    @Builder.Default
+    @Column(name = "total_income", nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalIncome = BigDecimal.ZERO;
 
-    @Column(name = "total_expense", precision = 19, scale = 2)
-    private BigDecimal totalExpense;
+    @Builder.Default
+    @Column(name = "total_expense", nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalExpense = BigDecimal.ZERO;
 
-    @Column(precision = 19, scale = 2)
-    private BigDecimal balance;
-
-    @Column(name = "transaction_count")
-    private Integer transactionCount;
+    @Builder.Default
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(columnDefinition = "text")
     private String message;
@@ -120,10 +119,34 @@ public class FinancialAnalysis {
         if (updatedAt == null) {
             updatedAt = now;
         }
+
+        if (totalIncome == null) {
+            totalIncome = BigDecimal.ZERO;
+        }
+
+        if (totalExpense == null) {
+            totalExpense = BigDecimal.ZERO;
+        }
+
+        if (balance == null) {
+            balance = BigDecimal.ZERO;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+
+        if (totalIncome == null) {
+            totalIncome = BigDecimal.ZERO;
+        }
+
+        if (totalExpense == null) {
+            totalExpense = BigDecimal.ZERO;
+        }
+
+        if (balance == null) {
+            balance = BigDecimal.ZERO;
+        }
     }
 }

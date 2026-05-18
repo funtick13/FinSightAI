@@ -1,10 +1,10 @@
 package com.finsightai.web.controller;
 
-import com.finsightai.web.dto.*;
 import com.finsightai.web.dto.auth.AuthRequest;
 import com.finsightai.web.dto.auth.ForgotPasswordRequest;
 import com.finsightai.web.dto.auth.LoginResponse;
 import com.finsightai.web.dto.auth.ResetPasswordRequest;
+import com.finsightai.web.dto.exception.MessageResponse;
 import com.finsightai.web.service.auth.AuthService;
 import com.finsightai.web.service.auth.EmailConfirmationTokenService;
 import jakarta.validation.Valid;

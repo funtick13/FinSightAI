@@ -1,6 +1,6 @@
 package com.finsightai.web.exception;
 
-import com.finsightai.web.dto.ErrorResponse;
+import com.finsightai.web.dto.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -13,7 +13,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Order(Ordered.LOWEST_PRECEDENCE)
 @RestControllerAdvice

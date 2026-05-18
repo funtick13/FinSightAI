@@ -1,7 +1,7 @@
 package com.finsightai.web.service.statement.processing;
 
-import com.finsightai.web.dto.statement.ParsedTransaction;
-import com.finsightai.web.dto.statement.TransactionCandidate;
+import com.finsightai.web.dto.transaction.ParsedTransaction;
+import com.finsightai.web.dto.transaction.TransactionCandidate;
 import com.finsightai.web.exception.StatementParsingException;
 import com.finsightai.web.model.Statement;
 import com.finsightai.web.model.User;
@@ -9,7 +9,7 @@ import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.StatementStatus;
 import com.finsightai.web.model.enums.TransactionType;
 import com.finsightai.web.repository.StatementRepository;
-import com.finsightai.web.service.ai.FinancialAnalysisService;
+import com.finsightai.web.service.analysis.FinancialAnalysisService;
 import com.finsightai.web.service.statement.duplicate.DuplicateTransactionDetector;
 import com.finsightai.web.service.statement.normalizer.TransactionNormalizer;
 import com.finsightai.web.service.statement.parser.PdfTextExtractor;

@@ -1,7 +1,7 @@
 package com.finsightai.web.service;
 
 import com.finsightai.web.dto.auth.AuthRequest;
-import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.dto.exception.MessageResponse;
 import com.finsightai.web.exception.EmailAlreadyExistsException;
 import com.finsightai.web.model.EmailConfirmationToken;
 import com.finsightai.web.model.User;

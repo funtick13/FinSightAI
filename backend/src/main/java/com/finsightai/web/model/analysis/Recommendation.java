@@ -36,7 +36,7 @@ public class Recommendation {
     @Column(nullable = false, columnDefinition = "text")
     private String text;
 
-    @Column(precision = 19, scale = 2)
+    @Column(name = "recommendation_value", precision = 19, scale = 2)
     private BigDecimal value;
 
     @Column(precision = 5, scale = 2)

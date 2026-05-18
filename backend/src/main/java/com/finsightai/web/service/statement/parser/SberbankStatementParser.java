@@ -1,6 +1,6 @@
 package com.finsightai.web.service.statement.parser;
 
-import com.finsightai.web.dto.statement.ParsedTransaction;
+import com.finsightai.web.dto.transaction.ParsedTransaction;
 import com.finsightai.web.exception.StatementParsingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

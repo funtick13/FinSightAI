@@ -1,4 +1,4 @@
-package com.finsightai.web.dto.statement;
+package com.finsightai.web.dto.transaction;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

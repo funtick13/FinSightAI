@@ -1,6 +1,6 @@
 package com.finsightai.web.service.statement.duplicate;
 
-import com.finsightai.web.dto.statement.TransactionCandidate;
+import com.finsightai.web.dto.transaction.TransactionCandidate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

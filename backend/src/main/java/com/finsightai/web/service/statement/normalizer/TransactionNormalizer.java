@@ -1,7 +1,7 @@
 package com.finsightai.web.service.statement.normalizer;
 
-import com.finsightai.web.dto.statement.ParsedTransaction;
-import com.finsightai.web.dto.statement.TransactionCandidate;
+import com.finsightai.web.dto.transaction.ParsedTransaction;
+import com.finsightai.web.dto.transaction.TransactionCandidate;
 import com.finsightai.web.exception.StatementParsingException;
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.TransactionType;

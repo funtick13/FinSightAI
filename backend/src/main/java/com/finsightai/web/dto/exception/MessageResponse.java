@@ -1,4 +1,4 @@
-package com.finsightai.web.dto;
+package com.finsightai.web.dto.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

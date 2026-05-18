@@ -1,8 +1,11 @@
-package com.finsightai.web.dto.statement;
+package com.finsightai.web.dto.transaction;
 
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.TransactionType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,16 +16,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
-public class TransactionResponse {
-    private UUID id;
-    private UUID statementId;
-    private BankType bank;
-    private String period;
+public class TransactionCandidate {
     private LocalDate date;
     private LocalTime time;
-    private TransactionType type;
     private BigDecimal amount;
+    private TransactionType type;
     private String category;
     private String description;
+    private BankType bank;
+    private String period;
+    private UUID userId;
+    private UUID statementId;
 }

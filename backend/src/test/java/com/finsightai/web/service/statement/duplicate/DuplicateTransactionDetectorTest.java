@@ -1,14 +1,12 @@
 package com.finsightai.web.service.statement.duplicate;
 
-import com.finsightai.web.dto.statement.TransactionCandidate;
+import com.finsightai.web.dto.transaction.TransactionCandidate;
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.TransactionType;
-import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

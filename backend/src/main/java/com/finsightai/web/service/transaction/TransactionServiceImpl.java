@@ -1,7 +1,7 @@
 package com.finsightai.web.service.transaction;
 
-import com.finsightai.web.dto.statement.TransactionCandidate;
-import com.finsightai.web.dto.statement.TransactionResponse;
+import com.finsightai.web.dto.transaction.TransactionCandidate;
+import com.finsightai.web.dto.transaction.TransactionResponse;
 import com.finsightai.web.exception.InvalidPeriodException;
 import com.finsightai.web.exception.StatementNotFoundException;
 import com.finsightai.web.exception.TransactionNotFoundException;

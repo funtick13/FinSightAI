@@ -1,6 +1,6 @@
 package com.finsightai.web.service.auth;
 
-import com.finsightai.web.dto.MessageResponse;
+import com.finsightai.web.dto.exception.MessageResponse;
 import com.finsightai.web.exception.TokenExpiredException;
 import com.finsightai.web.exception.TokenNotFoundException;
 import com.finsightai.web.model.EmailConfirmationToken;

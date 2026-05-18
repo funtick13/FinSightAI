@@ -1,11 +1,7 @@
 package com.finsightai.web.dto.ai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -15,6 +11,7 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class AiStatementPeriodDto {
+
     @JsonProperty("from")
     private LocalDate from;
 

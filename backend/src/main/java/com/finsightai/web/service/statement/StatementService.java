@@ -11,13 +11,16 @@ import com.finsightai.web.model.User;
 import com.finsightai.web.model.enums.BankType;
 import com.finsightai.web.model.enums.StatementStatus;
 import com.finsightai.web.repository.StatementRepository;
+import com.finsightai.web.service.analysis.FinancialAnalysisService;
 import com.finsightai.web.service.statement.processing.StatementProcessingService;
 import com.finsightai.web.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -32,6 +35,7 @@ public class StatementService {
     private final StatementMapper statementMapper;
     private final StatementProcessingService statementProcessingService;
     private final TransactionService transactionService;
+    private final FinancialAnalysisService financialAnalysisService;
 
     public StatementResponse uploadStatement(
             User user,
@@ -93,11 +97,22 @@ public class StatementService {
 
     public void deleteStatement(UUID userId, UUID statementId) {
         Statement statement = statementRepository.findByIdAndUserId(statementId, userId)
-                .orElseThrow(StatementNotFoundException::new);
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Выписка не найдена"
+                ));
+
+        BankType bank = statement.getBank();
+        String period = statement.getPeriod();
+        String filePath = statement.getFilePath();
 
         transactionService.deleteByStatementId(statementId);
-        fileStorageService.delete(statement.getFilePath());
+
         statementRepository.delete(statement);
+
+        fileStorageService.delete(filePath);
+
+        financialAnalysisService.analyzePeriod(userId, period, bank);
     }
 
     private void validateUpload(BankType bank, String period, MultipartFile file) {

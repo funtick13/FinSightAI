@@ -1,6 +1,6 @@
 package com.finsightai.web.controller;
 
-import com.finsightai.web.dto.statement.TransactionResponse;
+import com.finsightai.web.dto.transaction.TransactionResponse;
 import com.finsightai.web.model.User;
 import com.finsightai.web.service.transaction.TransactionServiceImpl;
 import lombok.AllArgsConstructor;

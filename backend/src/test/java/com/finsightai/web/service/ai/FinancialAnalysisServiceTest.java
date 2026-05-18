@@ -4,6 +4,7 @@ import com.finsightai.web.dto.ai.AiAnalysisRequest;
 import com.finsightai.web.dto.ai.AiAnalysisResponse;
 import com.finsightai.web.dto.ai.AiTransactionDto;
 import com.finsightai.web.model.enums.BankType;
+import com.finsightai.web.service.analysis.FinancialAnalysisService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
